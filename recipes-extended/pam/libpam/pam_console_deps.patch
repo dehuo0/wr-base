@@ -1,0 +1,13 @@
+Index: Linux-PAM-1.1.6/modules/pam_console/Makefile.am
+===================================================================
+--- Linux-PAM-1.1.6.orig/modules/pam_console/Makefile.am
++++ Linux-PAM-1.1.6/modules/pam_console/Makefile.am
+@@ -53,6 +53,8 @@ configfile.tab.c: configfile.y
+ 	$(YACC) $(BISON_OPTS) -o $@ -p _pc_yy $<
+ 	sh $(srcdir)/sed-static $@
+ 
++configfile.tab.h: configfile.tab.c
++
+ configfile.lex.c: configfile.l configfile.tab.c
+ 	$(LEX) $(FLEX_OPTS) -o$@ -P_pc_yy $<
+ 	sh $(srcdir)/sed-static $@
