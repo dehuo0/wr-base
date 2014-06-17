@@ -1,0 +1,11 @@
+This template sets sysklogd as the default system log daemons.
+
+To use, add
+
+--with-template=feature/sysklogd
+
+or 
+
+--enable-rootfs=glibc-*+sysklogd
+
+as a configure option.

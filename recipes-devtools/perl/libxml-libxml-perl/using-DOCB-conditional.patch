@@ -1,0 +1,79 @@
+Fix a compile error by conditional using 'XML_DOCB_DOCUMENT_NODE'
+since it is only defined when LIBXML_DOCB_ENABLED is enabled in
+xmlversion.h.
+
+Signed-off-by: Roy Li<rongqing.li@windriver.com>
+---
+ LibXML.xs        |    9 ++++++++-
+ dom.c            |    2 ++
+ perl-libxml-mm.c |    4 ++++
+ 3 files changed, 14 insertions(+), 1 deletion(-)
+
+--- a/LibXML.xs
++++ b/LibXML.xs
+@@ -4904,7 +4904,9 @@ addChild( self, nNode )
+             XSRETURN_UNDEF;
+         case XML_DOCUMENT_NODE :
+         case XML_HTML_DOCUMENT_NODE :
++#ifdef LIBXML_DOCB_ENABLED
+         case XML_DOCB_DOCUMENT_NODE :
++#endif
+             croak("addChild: HIERARCHY_REQUEST_ERR\n");
+             XSRETURN_UNDEF;
+         case XML_NOTATION_NODE :
+@@ -5131,7 +5133,9 @@ _toStringC14N(self, comments=0, xpath=&P
+         if ( nodepath == NULL
+              && self->type != XML_DOCUMENT_NODE
+              && self->type != XML_HTML_DOCUMENT_NODE
++#ifdef LIBXML_DOCB_ENABLED
+              && self->type != XML_DOCB_DOCUMENT_NODE
++#endif
+            ) {
+             if (comments)
+ 	      nodepath = xmlStrdup( (const xmlChar *) "(. | .//node() | .//@* | .//namespace::*)" );
+@@ -5142,7 +5146,10 @@ _toStringC14N(self, comments=0, xpath=&P
+         if ( nodepath != NULL ) {
+             if ( self->type == XML_DOCUMENT_NODE
+                  || self->type == XML_HTML_DOCUMENT_NODE
+-                 || self->type == XML_DOCB_DOCUMENT_NODE ) {
++#ifdef LIBXML_DOCB_ENABLED
++                 || self->type == XML_DOCB_DOCUMENT_NODE
++#endif
++	       ) {
+                 refNode = xmlDocGetRootElement( self->doc );
+             }
+ 	    if (SvOK(xpath_context)) {
+--- a/dom.c
++++ b/dom.c
+@@ -648,7 +648,9 @@ domName(xmlNodePtr node) {
+ 
+     case XML_DOCUMENT_NODE :
+     case XML_HTML_DOCUMENT_NODE :
++#ifdef LIBXML_DOCB_ENABLED
+     case XML_DOCB_DOCUMENT_NODE :
++#endif
+         name = (const xmlChar *) "#document";
+         break;
+ 
+--- a/perl-libxml-mm.c
++++ b/perl-libxml-mm.c
+@@ -331,7 +331,9 @@ PmmNewNode(xmlNodePtr node)
+         switch ( node->type ) {
+         case XML_DOCUMENT_NODE:
+         case XML_HTML_DOCUMENT_NODE:
++#ifdef LIBXML_DOCB_ENABLED
+         case XML_DOCB_DOCUMENT_NODE:
++#endif
+             proxy = (ProxyNodePtr)xmlMalloc(sizeof(struct _DocProxyNode));
+             if (proxy != NULL) {
+                 ((DocProxyNodePtr)proxy)->psvi_status = Pmm_NO_PSVI;
+@@ -550,7 +552,9 @@ PmmNodeToSv( xmlNodePtr node, ProxyNodeP
+         switch ( node->type ) {
+         case XML_DOCUMENT_NODE:
+         case XML_HTML_DOCUMENT_NODE:
++#ifdef LIBXML_DOCB_ENABLED
+         case XML_DOCB_DOCUMENT_NODE:
++#endif
+             if ( ((xmlDocPtr)node)->encoding != NULL ) {
+                 SetPmmENCODING(dfProxy, (int)xmlParseCharEncoding( (const char*)((xmlDocPtr)node)->encoding ));
+             }

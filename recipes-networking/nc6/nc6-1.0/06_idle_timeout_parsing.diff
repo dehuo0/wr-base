@@ -1,0 +1,15 @@
+Fix parsing of -t argument (from upstream cvs)
+
+Upstream-Status: Pending [Debian patch] 
+
+--- a/src/parser.c
++++ b/src/parser.c
+@@ -164,7 +164,7 @@
+ 	_verbosity_level = 0;
+ 
+ 	/* option recognition loop */
+-	while ((c = getopt_long(argc, argv, "46be:T:hlnp:q:s:uvw:xXC",
++	while ((c = getopt_long(argc, argv, "46be:T:hlnp:q:s:uvw:xXCt:",
+ 	                        long_options, &option_index)) >= 0)
+ 	{
+  		switch (c) {

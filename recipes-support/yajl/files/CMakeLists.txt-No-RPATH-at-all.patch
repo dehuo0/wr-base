@@ -1,0 +1,25 @@
+CMakeLists.txt: No RPATH at all
+
+There is a builtin CMake option CMAKE_SKIP_RPATH, if it is enabled all
+other RPATH related options are ignored, no RPATH is built into anything.
+
+Upstream-Status: Pending
+Signed-off-by: Hongxu Jia <hongxu.jia@windriver.com>
+---
+ CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -63,6 +63,7 @@ ELSE (WIN32)
+ ENDIF (WIN32) 
+ 
+ 
++SET(CMAKE_SKIP_RPATH TRUE)
+ ADD_SUBDIRECTORY(src)
+ ADD_SUBDIRECTORY(test)
+ ADD_SUBDIRECTORY(reformatter)
+-- 
+1.8.1.2
+

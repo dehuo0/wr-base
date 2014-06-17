@@ -1,0 +1,15 @@
+This template adds oe-core debugging packages and
+also the debug-wb workbench packages.
+
+To use, add
+
+--with-template=feature/debug
+
+as a configure option, or
+
+--enable-rootfs=glibc_(small|std)+debug
+
+You may also have to add the configure option
+
+--with-layer=wr-tools-debug
+

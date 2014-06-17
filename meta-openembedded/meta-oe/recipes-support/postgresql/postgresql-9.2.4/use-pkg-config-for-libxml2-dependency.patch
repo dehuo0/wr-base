@@ -1,0 +1,44 @@
+From 744bbd99a779deac244cebc30f21db9b77946eab Mon Sep 17 00:00:00 2001
+From: Wenzong Fan <wenzong.fan@windriver.com>
+Date: Thu, 19 Jun 2014 22:34:21 -0400
+Subject: [PATCH] postgresql: Use pkg-config for libxml2 dependency
+
+Use pkg-config for the libxml2 dependency, not the -config script.
+
+Upstream-Status: Pending
+
+Signed-off-by: Wenzong Fan <wenzong.fan@windriver.com>
+---
+ configure.in |   16 ++++------------
+ 1 file changed, 4 insertions(+), 12 deletions(-)
+
+diff --git a/configure.in b/configure.in
+index 3bf9728..d768e9f 100644
+--- a/configure.in
++++ b/configure.in
+@@ -709,18 +709,10 @@ PGAC_ARG_BOOL(with, libxml, no, [build with XML support],
+               [AC_DEFINE([USE_LIBXML], 1, [Define to 1 to build with XML support. (--with-libxml)])])
+ 
+ if test "$with_libxml" = yes ; then
+-  AC_CHECK_PROGS(XML2_CONFIG, xml2-config)
+-  if test -n "$XML2_CONFIG"; then
+-    for pgac_option in `$XML2_CONFIG --cflags`; do
+-      case $pgac_option in
+-        -I*|-D*) CPPFLAGS="$CPPFLAGS $pgac_option";;
+-      esac
+-    done
+-    for pgac_option in `$XML2_CONFIG --libs`; do
+-      case $pgac_option in
+-        -L*) LDFLAGS="$LDFLAGS $pgac_option";;
+-      esac
+-    done
++  PKG_CHECK_MODULES(PKG_XML2, [libxml-2.0],,)
++  if test "x$PKG_XML2_CFLAGS" != "x"; then
++    CPPFLAGS="$CPPFLAGS $PKG_XML2_CFLAGS"
++    LDFLAGS="$LDFLAGS $PKG_XML2_LIBS"
+   fi
+ fi
+ 
+-- 
+1.7.9.5
+

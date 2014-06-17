@@ -1,0 +1,62 @@
+strip_slash_r_feature
+
+Signed-off-by: Jason Wessel <jason.wessel@windriver.com>
+Signed-off-by: Mark Hatle <mark.hatle@windriver.com>
+Signed-off-by: Chong Lu <Chong.Lu@windriver.com>
+---
+ term-utils/script.c |   18 +++++++++++++++++-
+ 1 file changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/term-utils/script.c b/term-utils/script.c
+index 6bc91e4..110dbdf 100644
+--- a/term-utils/script.c
++++ b/term-utils/script.c
+@@ -107,6 +107,7 @@ int	eflg = 0;
+ int	fflg = 0;
+ int	qflg = 0;
+ int	tflg = 0;
++int	rflg = 0;
+ int	forceflg = 0;
+ 
+ int die;
+@@ -184,7 +185,7 @@ main(int argc, char **argv) {
+ 	textdomain(PACKAGE);
+ 	atexit(close_stdout);
+ 
+-	while ((ch = getopt_long(argc, argv, "ac:efqt::Vh", longopts, NULL)) != -1)
++	while ((ch = getopt_long(argc, argv, "ac:efqrt::Vh", longopts, NULL)) != -1)
+ 		switch(ch) {
+ 		case 'a':
+ 			aflg = 1;
+@@ -218,6 +219,9 @@ main(int argc, char **argv) {
+ 		case 'h':
+ 			usage(stdout);
+ 			break;
++		case 'r':
++			rflg++;
++			break;
+ 		case '?':
+ 		default:
+ 			usage(stderr);
+@@ -396,6 +400,18 @@ dooutput(FILE *timingfd) {
+ 			fprintf(timingfd, "%f %zd\n", newtime - oldtime, cc);
+ 			oldtime = newtime;
+ 		}
++		if (rflg) {
++			int newcc = 0;
++			int i;
++			for (i = 0; i < cc; i++)
++				if (obuf[i] != '\r') {
++					obuf[newcc] = obuf[i];
++					newcc++;
++				}
++			cc = newcc;
++			if (!cc)
++				continue;
++		}
+ 		fwrt = fwrite(obuf, 1, cc, fscript);
+ 		if (fwrt < cc) {
+ 			warn (_("cannot write script file"));
+-- 
+1.7.9.5
+

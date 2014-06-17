@@ -1,0 +1,34 @@
+Very verbose mode
+
+Upstream-Status: Pending [Debian patch] 
+
+--- a/src/network.c
++++ b/src/network.c
+@@ -23,6 +23,7 @@
+ #include "network.h"
+ #include "connection.h"
+ #include "afindep.h"
++#include "parser.h"
+ #ifdef ENABLE_BLUEZ
+ #include "bluez.h"
+ #endif/*ENABLE_BLUEZ*/
+@@ -292,13 +293,16 @@
+ 	/* announce the socket in very verbose mode */
+ 	switch (socktype) {
+ 	case SOCK_STREAM:
+-		warning(_("using stream socket"));
++		if (very_verbose_mode())
++			warning(_("using stream socket"));
+ 		break;
+ 	case SOCK_DGRAM:
+-		warning(_("using datagram socket"));
++		if (very_verbose_mode())
++			warning(_("using datagram socket"));
+ 		break;
+ 	case SOCK_SEQPACKET:
+-		warning(_("using seqpacket socket"));
++		if (very_verbose_mode())
++			warning(_("using seqpacket socket"));
+ 		break;
+ 	default:
+ 		fatal_internal("unsupported socket type %d", socktype);

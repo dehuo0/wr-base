@@ -1,0 +1,22 @@
+Fix a compile error by conditional using 'catal' since catal is only 
+defined when LIBXML_CATALOG_ENABLED is enabled.
+
+Signed-off-by: Roy Li<rongqing.li@windriver.com>
+---
+ LibXML.xs |    2 ++
+ 1 file changed, 2 insertions(+)
+
+--- a/LibXML.xs
++++ b/LibXML.xs
+@@ -2685,9 +2685,11 @@ _default_catalog( self, catalog )
+         xmlCatalogPtr catal = INT2PTR(xmlCatalogPtr,SvIV(SvRV(catalog)));
+ #endif
+     INIT:
++#ifdef LIBXML_CATALOG_ENABLED
+         if ( catal == NULL ) {
+             croak( "empty catalog\n" );
+         }
++#endif
+     CODE:
+         warn( "this feature is not implemented" );
+         RETVAL = 0;

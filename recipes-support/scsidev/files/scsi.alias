@@ -1,0 +1,20 @@
+#
+# $Id: scsi.alias,v 1. 2000/07/15 00:05:10 garloff Exp $
+#
+# Note: this is just an example scsi.alias conf file
+# It has to be updated to reflect any new devices
+# added to the system.
+#
+# Last Modified by: Aws Ismail <aws.ismail@windriver.com>
+#
+#
+# Uncomment the following line according to the devices
+# Currently available on the system
+#
+#sierial_number="DX908FK", devtype=disk, alias=fourgig
+#manufacturer=WANGTEK, devtype=tape, alias=qictape
+#id=2, devtype=generic, alias=cdwriter
+#hostname="ncr53c8xx", manufacturer="IBM", devtype=disk, alias=IBM_OLD
+#hostname="Tekram DC390", rev="W6A6", serial="F36J5322", devtype=disk, alias=IBM_DCAS
+#hostname="Tekram DC395", devtype=osst, alias=ONSTREAM
+#devtype=disk, alias=sda

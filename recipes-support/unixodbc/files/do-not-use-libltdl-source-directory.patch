@@ -1,0 +1,52 @@
+From c2f4f15a1bd73a30f52ac69b949ff816cc4a1a2e Mon Sep 17 00:00:00 2001
+From: "Song.Li" <Song.Li@windriver.com>
+Date: Fri, 16 Nov 2012 17:34:50 +0800
+Subject: [PATCH] do not use libltdl source directory
+
+In wrlinux libtool,config/compile,config/depcomp
+file weren't installed.If we use the libltdl
+source directory,we will get "comfig/compile:No such
+file" error during doing configure.In fact there is no
+need to compile libltdl,we already have it in sysroot.
+
+so remove it in Makefile.am and configure.in.
+In this way, configure will use the libltdl
+in sysroot, that's what we want.
+
+Signed-off-by: Song.Li <Song.Li@windriver.com>
+---
+ Makefile.am  |    1 -
+ configure.in |    4 ++--
+ 2 files changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index a29822a..58dc567 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -5,7 +5,6 @@ SUBDIRS = \
+ 	log \
+ 	lst \
+ 	ini \
+-    libltdl \
+ 	odbcinst \
+ 	DriverManager \
+ 	exe \
+diff --git a/configure.in b/configure.in
+index 8dacf9b..1b23413 100644
+--- a/configure.in
++++ b/configure.in
+@@ -137,9 +137,9 @@ AC_CONFIG_MACRO_DIR([libltdl/m4])
+ dnl LT_CONFIG_LTDL_DIR([libltdl])
+ dnl LTDL_INIT
+ 
+-LT_CONFIG_LTDL_DIR([libltdl])
++#LT_CONFIG_LTDL_DIR([libltdl])
+ LT_INIT([dlopen])
+-LTDL_INIT([convenience])
++#LTDL_INIT([convenience])
+ 
+ dnl Substitute INCLTDL and LIBLTDL in the Makefiles
+ AC_SUBST(LTDLINCL)
+-- 
+1.7.9.5
+

@@ -1,0 +1,61 @@
+lmbench: Fix incorrect syntax introduced into lmbench/src/Makefile
+
+The previous change may try to pass build system default CFLAGS to lmbench 
+and keep its original value(-O) at the same time.
+
+But '+=' method won't work here because it's passed to 'env' command.
+(Although it appears in Makefile, it won't follow Makefile syntax any more.)
+    
+In the end, '-O' option is missing when compiling lmbench. (build system 
+CFLAGS can be passed to compiler.)
+
+Signed-off-by: Shang Yanfeng <YanFeng.Shang@windriver.com>
+Signed-off-by: Fupan Li <fupan.li@windriver.com>
+
+Reword patch description.
+
+Upstream-status: inappropriate [ bug fix ]
+
+Signed-off-by: Mark Hatle <mark.hatle@windriver.com>
+
+diff --git a/src/Makefile b/src/Makefile
+index 5098998..a73bba3 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -111,8 +111,8 @@ LIBOBJS= $O/lib_tcp.o $O/lib_udp.o $O/lib_unix.o $O/lib_timing.o 	\
+ 	$O/lib_sched.o
+ 
+ lmbench: $(UTILS)
+-	@env CFLAGS+=-O MAKE="$(MAKE)" MAKEFLAGS="$(MAKEFLAGS)" CC="$(CC)" OS="$(OS)" ../scripts/build all
+-	-@env CFLAGS+=-O MAKE="$(MAKE)" MAKEFLAGS="k$(MAKEFLAGS)" CC="$(CC)" OS="$(OS)" ../scripts/build opt
++	@env CFLAGS="$(CFLAGS) -O" MAKE="$(MAKE)" MAKEFLAGS="$(MAKEFLAGS)" CC="$(CC)" OS="$(OS)" ../scripts/build all
++	-@env CFLAGS="$(CFLAGS) -O" MAKE="$(MAKE)" MAKEFLAGS="k$(MAKEFLAGS)" CC="$(CC)" OS="$(OS)" ../scripts/build opt
+ 
+ 
+ results: lmbench
+@@ -137,7 +137,7 @@ os: lmbench
+ 	@env OS="${OS}" BENCHMARK_HARDWARE=NO  BENCHMARK_OS=YES ../scripts/results
+ 
+ install: lmbench
+-	@env CFLAGS+=-O MAKE="$(MAKE)"  MAKEFLAGS="$(MAKEFLAGS)" CC="${CC}" OS="${OS}" ../scripts/build install-target
++	@env CFLAGS="$(CFLAGS) -O" MAKE="$(MAKE)"  MAKEFLAGS="$(MAKEFLAGS)" CC="${CC}" OS="${OS}" ../scripts/build install-target
+ 
+ install-target:
+ 	if [ ! -d $(BASE) ]; then mkdir $(BASE); fi
+@@ -158,13 +158,13 @@ $(ASMS):
+ 	$(CC) -S $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o $@ `basename $@ .s`.c
+ 
+ Wall:
+-	@env CFLAGS+="-g -O -Wall" MAKE="$(MAKE)" MAKEFLAGS="$(MAKEFLAGS)" CC="${CC}" OS="${OS}" ../scripts/build all opt
++	@env CFLAGS="$(CFLAGS) -g -O -Wall" MAKE="$(MAKE)" MAKEFLAGS="$(MAKEFLAGS)" CC="${CC}" OS="${OS}" ../scripts/build all opt
+ 
+ debug:
+-	@env CFLAGS+="-g -O -DDEBUG" MAKE="$(MAKE)" MAKEFLAGS="$(MAKEFLAGS)" CC="${CC}" OS="${OS}" ../scripts/build all opt
++	@env CFLAGS="$(CFLAGS) -g -O -DDEBUG" MAKE="$(MAKE)" MAKEFLAGS="$(MAKEFLAGS)" CC="${CC}" OS="${OS}" ../scripts/build all opt
+ 
+ assembler:
+-	@env CFLAGS+=-O MAKE="$(MAKE)" MAKEFLAGS="$(MAKEFLAGS)" CC="${CC}" OS="${OS}" ../scripts/build asm
++	@env CFLAGS="$(CFLAGS) -O" MAKE="$(MAKE)" MAKEFLAGS="$(MAKEFLAGS)" CC="${CC}" OS="${OS}" ../scripts/build asm
+ 
+ 
+ tag:

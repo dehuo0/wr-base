@@ -1,0 +1,41 @@
+From ceb5540c3eca86c34820cd5b81eb7f073799368c Mon Sep 17 00:00:00 2001
+From: Balazs Scheidler <bazsi@balabit.hu>
+Date: Sat, 19 Oct 2013 10:57:00 +0200
+Subject: [PATCH] persist-state: fix memory leak in persist_state_rename_entry
+
+Upstream-Status: Backport
+
+The old key was leaked when renaming a persist-state key. This patch fixes
+that leak.
+
+Signed-off-by: Juhasz Viktor <jviktor@balabit.hu>
+Signed-off-by: Balazs Scheidler <bazsi@balabit.hu>
+---
+ lib/persist-state.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/lib/persist-state.c b/lib/persist-state.c
+index b15fa97..aa7eba3 100644
+--- a/lib/persist-state.c
++++ b/lib/persist-state.c
+@@ -312,13 +312,15 @@ gboolean
+ persist_state_rename_entry(PersistState *self, const gchar *old_key, const gchar *new_key)
+ {
+   PersistEntry *entry;
++  gpointer old_orig_key;
+ 
+-  entry = g_hash_table_lookup(self->keys, old_key);
+-  if (entry)
++  if (g_hash_table_lookup_extended(self->keys, old_key, &old_orig_key, (gpointer *)&entry))
+     {
+       if (g_hash_table_steal(self->keys, old_key))
+         {
++          g_free(old_orig_key);
+           g_hash_table_insert(self->keys, g_strdup(new_key), entry);
++          return TRUE;
+         }
+     }
+   return FALSE;
+-- 
+1.8.4.1
+

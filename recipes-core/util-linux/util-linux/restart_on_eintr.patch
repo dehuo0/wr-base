@@ -1,0 +1,46 @@
+restart_on_eintr
+
+Signed-off-by: Jason Wessel <jason.wessel@windriver.com>
+Signed-off-by: Mark Hatle <mark.hatle@windriver.com>
+Signed-off-by: Chong Lu <Chong.Lu@windriver.com>
+---
+ term-utils/script.c |   16 ++++++++++++----
+ 1 file changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/term-utils/script.c b/term-utils/script.c
+index 457725c..a36abc9 100644
+--- a/term-utils/script.c
++++ b/term-utils/script.c
+@@ -624,8 +624,12 @@ doinput(void) {
+ 	while (die == 0) {
+ 		memcpy(&rds, &master_rds, sizeof(master_rds));
+ 		select_ret = select(1, &rds, NULL, NULL, NULL);
+-		if (select_ret < 0)
+-			break;
++		if (select_ret < 0) {
++			if (errno == EINTR)
++				continue;
++			else
++				break;
++		}
+ 		if ((cc = read(STDIN_FILENO, ibuf, BUFSIZ)) > 0) {
+ 			ssize_t wrt = write(master, ibuf, cc);
+ 			if (wrt < 0) {
+@@ -656,8 +660,12 @@ socket_con:
+ 	while (die == 0) {
+ 		memcpy(&rds, &master_rds, sizeof(master_rds));
+ 		select_ret = select(nsockhandle, &rds, NULL, NULL, NULL);
+-		if (select_ret < 0)
+-			break;
++		if (select_ret < 0) {
++			if (errno == EINTR)
++				continue;
++			else
++				break;
++		}
+ 		if (FD_ISSET(0, &rds))
+ 			if (handle_stdin(ibuf) < 0) {
+ 				fprintf(stderr, "Error: Client input failure\n");
+-- 
+1.7.9.5
+

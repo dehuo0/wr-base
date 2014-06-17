@@ -1,0 +1,31 @@
+commit 0022e9695e7511f8af53704147e6badf464a69b0
+Author: Aws Ismail <aws.ismail@windriver.com>
+Date:   Thu Jun 28 10:55:01 2012 -0400
+
+    fix open() missing mode in scsidev
+    
+    Adding mode argument to function open to fix the __open_missing_mode error:
+    open with O_CREAT in second argument needs 3 arguments, which will be reported
+    when -D_FORTIFY_SOURCE=2 is added as compiler option. The permission will be
+    modified after the creation of the file, so read/write permission for file owner
+    is enough. This is still a defect in the newest version of scsidev. or 2.37.
+    
+    Signed-off-by: Jason HU <yongqi.hu@windriver.com>
+    
+    This patch was migrated from WRL4.3
+    
+    Signed-off-by: Aws Ismail <aws.ismail@windriver.com>
+
+diff --git a/scsidev.c b/scsidev.c
+index b3b3752..34dda3f 100644
+--- a/scsidev.c
++++ b/scsidev.c
+@@ -747,7 +747,7 @@ void backup_shadow (const char* nm, struct stat *stbuf)
+ 		return;
+ 	
+ 	if (status) {
+-		int fd = open (shadow, O_RDWR | O_CREAT | O_EXCL);
++		int fd = open (shadow, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
+ 		close (fd);
+ 	}
+ 	apply_perm (shadow, stbuf, 0);

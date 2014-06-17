@@ -1,0 +1,15 @@
+This template adds demo packages, oe-core debugging packages, and
+also the debug-wb workbench packages.
+
+To use, add
+
+--with-template=feature/demo
+
+as a configure option, or
+
+--enable-rootfs=glibc_(small|std)+demo
+
+You may also have to add the configure option
+
+--with-layer=wr-tools-debug
+

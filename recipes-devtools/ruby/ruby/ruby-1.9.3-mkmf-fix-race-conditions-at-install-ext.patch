@@ -1,0 +1,28 @@
+Fix race conditions when installing extensions
+
+lib/mkmf.rb (used to make makefile for ruby extensions):
+target files need to depend on destination directory, not the phony trgets.
+
+Signed-off-by: Jackie Huang <jackie.huang@windriver.com>
+---
+ lib/mkmf.rb |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/lib/mkmf.rb b/lib/mkmf.rb
+index aeba4d0..87078b1 100644
+--- a/lib/mkmf.rb
++++ b/lib/mkmf.rb
+@@ -2030,8 +2030,8 @@ static: $(STATIC_LIB)#{$extout ? " install-rb" : ""}
+       end
+       for f in files
+         dest = "#{dir}/#{File.basename(f)}"
+-        mfile.print("install-rb#{sfx}: #{dest} #{dir}\n")
+-        mfile.print("#{dest}: #{f}\n")
++        mfile.print("install-rb#{sfx}: #{dest}\n")
++        mfile.print("#{dest}: #{f} #{dir}\n")
+         mfile.print("\t$(Q) $(#{$extout ? 'COPY' : 'INSTALL_DATA'}) #{f} $(@D#{sep})\n")
+         if defined?($installed_list) and !$extout
+           mfile.print("\t@echo #{dest}>>$(INSTALLED_LIST)\n")
+-- 
+1.7.4
+

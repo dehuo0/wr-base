@@ -1,0 +1,32 @@
+From bde230cfc593638cb65e16f20acaf51c0709ad07 Mon Sep 17 00:00:00 2001
+From: "Song.Li" <Song.Li@windriver.com>
+Date: Fri, 12 Oct 2012 16:51:11 +0800
+Subject: [PATCH] change hard coded lib path
+
+projlibdir use a hard coded lib path,
+this will cause error when build a 64bit target.
+so change it to suitable path.
+
+Upstream-Status: Pending
+
+Signed-off-by: Song.Li <Song.Li@windriver.com>
+---
+ configure.ac |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index 6d74d40..742eab1 100755
+--- a/configure.ac
++++ b/configure.ac
+@@ -134,7 +134,7 @@ AS_IF([test x"$enable_fhs" = xyes], [
+   fi
+ 
+   sbindir='${exec_prefix}/bin' # /var/cfengine/bin despite being sbin_?
+-  projlibdir='${exec_prefix}/lib'
++  projlibdir='${libdir}'
+   projdatadir='${exec_prefix}/share'
+   projdocdir='${exec_prefix}/share/doc'
+   mandir='${exec_prefix}/share/man'
+-- 
+1.7.9.5
+

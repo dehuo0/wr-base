@@ -1,0 +1,114 @@
+Make initscripts WRS friendly 
+
+Modified multipath.rules and multipathd.service
+to point to the correct path of multipathd
+ 
+Modified multipathd.init.redhat to use start-stop-
+daemon command instead of daemon. Also used the
+correct paths for $sysconfdir and $DAEMON
+
+Created a proper "status" case to report the status
+of the daemon when called
+
+Upstream-Status: Inappropriate [embedded specific]
+
+Signed-off-by: Aws Ismail <aws.ismail@windriver.com>
+
+diff --git a/multipath/multipath.rules b/multipath/multipath.rules
+index 2da3342..a3728b4 100644
+--- a/multipath/multipath.rules
++++ b/multipath/multipath.rules
+@@ -2,8 +2,8 @@
+ # so name them after their devmap name
+ SUBSYSTEM!="block", GOTO="end_mpath"
+ 
+-ENV{MPATH_SBIN_PATH}="/sbin"
+-TEST!="$env{MPATH_SBIN_PATH}/multipath", ENV{MPATH_SBIN_PATH}="/usr/sbin"
++ENV{MPATH_SBIN_PATH}="/usr/bin"
++TEST!="$env{MPATH_SBIN_PATH}/multipath", ENV{MPATH_SBIN_PATH}="/usr/bin"
+ 
+ ACTION=="add", ENV{DEVTYPE}!="partition", \
+ 	ENV{DM_MULTIPATH_DEVICE_PATH}!="1", \
+diff --git a/multipathd/multipathd.init.redhat b/multipathd/multipathd.init.redhat
+index 15b5753..0216299 100644
+--- a/multipathd/multipathd.init.redhat
++++ b/multipathd/multipathd.init.redhat
+@@ -16,18 +16,13 @@
+ #              device-mapper multipath devices
+ ### END INIT INFO
+ 
+-DAEMON=/sbin/multipathd
++DAEMON=/usr/bin/multipathd
+ prog=`basename $DAEMON`
+-initdir=/etc/rc.d/init.d
++initdir=/etc/init.d
+ lockdir=/var/lock/subsys
+ sysconfig=/etc/sysconfig
+ syspath=/sys/block
+ 
+- 
+-. $initdir/functions
+- 
+-test -r $sysconfig/$prog && . $sysconfig/$prog
+-
+ RETVAL=0
+ 
+ teardown_slaves()
+@@ -67,7 +62,7 @@ popd > /dev/null
+ start() {
+ 	test -x $DAEMON || exit 5
+ 	echo -n $"Starting $prog daemon: "
+-	daemon $DAEMON
++	start-stop-daemon --start --quiet --exec $DAEMON
+ 	RETVAL=$?
+ 	[ $RETVAL -eq 0 ] && touch $lockdir/$prog
+ 	echo
+@@ -75,7 +70,7 @@ start() {
+ 
+ force_stop() {
+ 	echo -n $"Stopping $prog daemon: "
+-	killproc $DAEMON
++	killall $DAEMON
+ 	RETVAL=$?
+ 	[ $RETVAL -eq 0 ] && rm -f $lockdir/$prog
+ 	echo
+@@ -105,7 +100,7 @@ force_restart() {
+ reload() {
+ 	echo -n "Reloading $prog: "
+ 	trap "" SIGHUP
+-	killproc $DAEMON -HUP
++	killall $DAEMON -s SIGHUP -v
+ 	RETVAL=$?
+ 	echo
+ }	
+@@ -135,8 +130,13 @@ condrestart|try-restart)
+ 	fi
+ 	;;
+ status)
+-	status $prog
+-	RETVAL=$?
++    if pidof -o %PPID $DAEMON > /dev/null; then
++        echo "Running"
++        RETVAL=0
++    else
++        echo "Not running"
++        RETVAL=1
++    fi
+ 	;;
+ *)
+ 	echo $"Usage: $0 {start|stop|force-stop|status|restart|force-restart|condrestart|reload}"
+diff --git a/multipathd/multipathd.service b/multipathd/multipathd.service
+index 10bd388..295eb51 100644
+--- a/multipathd/multipathd.service
++++ b/multipathd/multipathd.service
+@@ -7,8 +7,8 @@ ConditionPathExists=/etc/multipath.conf
+ [Service]
+ Type=forking
+ PIDFile=/var/run/multipathd.pid
+-ExecStart=/sbin/multipathd
+-ExecReload=/sbin/multipathd reconfigure
++ExecStart=/usr/bin/multipathd
++ExecReload=/usr/bin/multipathd reconfigure
+ #ExecStop=/path/to/scrip delete-me if not necessary
+ 
+ [Install]

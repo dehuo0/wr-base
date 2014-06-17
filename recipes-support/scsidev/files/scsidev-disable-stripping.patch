@@ -1,0 +1,23 @@
+commit a0066146ba571434e0f648c63fd471def1a66ee1
+Author: Aws Ismail <aws.ismail@windriver.com>
+Date:   Thu Jun 28 10:38:49 2012 -0400
+
+    Disable stripping scsidev binary when installing
+    
+    This patch was migrated from WRL4.3
+    
+    Signed-off-by: Aws Ismail <aws.ismail@windriver.com>
+
+diff --git a/Makefile.in b/Makefile.in
+index 2db0044..e57ac53 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -49,7 +49,7 @@ configure:  configure.in
+ 
+ install: scsidev
+ 	install -d $(bindir)
+-	install -m 755 -s scsidev $(bindir)
++	install -m 755 scsidev $(bindir)
+ 	install -d $(mandir)
+ 	install -m 644 scsidev.8 $(mandir)
+ 	gzip -9f $(mandir)/scsidev.8

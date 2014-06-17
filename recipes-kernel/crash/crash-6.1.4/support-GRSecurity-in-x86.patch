@@ -1,0 +1,145 @@
+Support GRSecurity in x86
+
+Upstream-Status: pending [community rejects patches which is related to GRSecurity]
+
+1. Store symbols which start from address 0x0, since percpu variable address
+has become a offset, not a absolute address when apply GRSecurity patch, which
+start from address 0x0.
+
+after
+        # head -n 5 /proc/kallsyms
+        00000000 d tlb_vector_offset
+        00000000 D __per_cpu_start
+        00000040 d cpu_loops_per_jiffy
+        00000080 D irq_regs
+        00000084 d hardirq_ctx
+        #
+
+before
+        #grep cpu_loops_per_jiffy /proc/kallsyms
+        c1a2e040 d cpu_loops_per_jiffy
+        #
+        #grep " irq_regs" /proc/kallsyms
+        c1a2e080 D irq_regs
+        #
+2. Since percpu variable address has become a offset, so when read runqueue value
+, we should add the offset __per_cpu_offset.
+
+3. avoid to call OFFSET(thread_info_task), if task is not a valid member of struct
+thread_info. since GRSecurity patch removes the task member from struct thread_info,
+make VALID_MEMBER(thread_info_task) false.
+
+The section of GRSecurity patch:
+ #       --- a/arch/x86/include/asm/thread_info.h
+ #       +++ b/arch/x86/include/asm/thread_info.h
+ #       @@ -24,7 +25,6 @@ struct exec_domain;
+ #        #include <linux/atomic.h>
+ #
+ #        struct thread_info {
+ #       -       struct task_struct      *task;          /* main task structure */
+ #               struct exec_domain      *exec_domain;   /* execution domain */
+
+Signed-off-by: Roy.Li <rongqing.li@windriver.com>
+---
+ task.c |   31 +++++++++++++++++++++++++------
+ x86.c  |   21 ++++++++++++++++++++-
+ 2 files changed, 45 insertions(+), 7 deletions(-)
+
+diff --git a/task.c b/task.c
+index fec9f6a..536c6f5 100755
+--- a/task.c
++++ b/task.c
+@@ -549,9 +549,9 @@ irqstacks_init(void)
+                             	i, tt->hardirq_ctx[i]);
+                         continue;
+                 }
+-
+-                tt->hardirq_tasks[i] = 
+-			ULONG(thread_info_buf+OFFSET(thread_info_task));
++		if (VALID_MEMBER(thread_info_task))
++                	tt->hardirq_tasks[i] = 
++				ULONG(thread_info_buf+OFFSET(thread_info_task));
+ 	}
+ 
+ 	if ((soft_sp = per_cpu_symbol_search("per_cpu__softirq_ctx"))) {
+@@ -583,9 +583,9 @@ irqstacks_init(void)
+                        		i, tt->hardirq_ctx[i]);
+                     	continue;
+                 }
+-
+-                tt->softirq_tasks[i] =
+-                        ULONG(thread_info_buf+OFFSET(thread_info_task));
++		if (VALID_MEMBER(thread_info_task))
++                	tt->softirq_tasks[i] =
++                        	ULONG(thread_info_buf+OFFSET(thread_info_task));
+         }
+ 
+ 
+@@ -6728,6 +6728,25 @@ get_idle_threads(ulong *tasklist, int nr_cpus)
+ 			if (IS_KVADDR(tasklist[i]))
+ 				cnt++;
+ 		}
++#ifdef X86
++	} else if ((rq_sp = per_cpu_symbol_search("runqueues")) &&
++		    VALID_MEMBER(runqueue_idle) &&
++		    !(rq_sp->value & 0xc0000000)) {
++		runqbuf = GETBUF(SIZE(runqueue));
++		for (i = 0; i < nr_cpus; i++) {
++			if ((kt->flags & SMP) && (kt->flags & PER_CPU_OFF))
++				runq = rq_sp->value + kt->__per_cpu_offset[i];
++			else
++				runq = rq_sp->value;
++
++			readmem(runq, KVADDR, runqbuf,
++                        	SIZE(runqueue), "runqueues entry (per_cpu)",
++                        	FAULT_ON_ERROR);		
++			tasklist[i] = ULONG(runqbuf + OFFSET(runqueue_idle)); 
++			if (IS_KVADDR(tasklist[i]))
++				cnt++;
++		}
++#endif
+ 	} else if (symbol_exists("runqueues") && VALID_MEMBER(runqueue_idle)) {
+ 		runq = symbol_value("runqueues");
+ 		runqbuf = GETBUF(SIZE(runqueue));
+diff --git a/x86.c b/x86.c
+index 6aa11c4..2da6ffd 100755
+--- a/x86.c
++++ b/x86.c
+@@ -1791,7 +1791,11 @@ x86_init(int when)
+ 			machdep->pmd = machdep->pgd;   
+ 		}
+ 		machdep->ptrs_per_pgd = PTRS_PER_PGD;
+-	        machdep->kvbase = symbol_value("_stext") & ~KVBASE_MASK;  
++		if ((symbol_value("_stext") & 0xff000000) == 0)
++	        	machdep->kvbase = symbol_value("idt_table") & ~KVBASE_MASK;
++		else
++	        	machdep->kvbase = symbol_value("_stext") & ~KVBASE_MASK;  
++
+ 		if (machdep->kvbase & 0x80000000) 
+                 	machdep->is_uvaddr = generic_is_uvaddr;
+ 		else {
+@@ -4059,6 +4063,21 @@ x86_verify_symbol(const char *name, ulong value, char type)
+ 	if (CRASHDEBUG(8) && name && strlen(name))
+ 		fprintf(fp, "%08lx %s\n", value, name);
+ 
++	if ((value & 0xc0000000) == 0x0) {
++		if (STREQ(name, "__per_cpu_start")  ) {
++        	                st->flags |= PERCPU_SYMS;
++        	                return TRUE;
++        	} else if (st->flags & PERCPU_SYMS) {
++
++			if (STREQ(name, "__per_cpu_end")) {
++				return TRUE;
++			}
++
++			if ((type == 'V') || (type == 'd') || (type == 'D'))
++		                return TRUE;
++		}
++	}
++
+ 	if (STREQ(name, "_text") || STREQ(name, "_stext"))
+ 		machdep->flags |= KSYMS_START;
+ 
+-- 
+1.7.10.4
+
