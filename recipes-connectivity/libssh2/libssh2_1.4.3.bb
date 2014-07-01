@@ -19,8 +19,8 @@ SRC_URI = "http://www.libssh2.org/download/libssh2-${PV}.tar.gz \
            file://user \
            file://user.pub"
 
-SRC_URI[md5sum] = "42e2b3796ac07fc1dbafc7abcc002cd3"
-SRC_URI[sha256sum] = "418c09061fb9c3c26fec391a35a062780b21b3199885e3b27054619582469bd3"
+SRC_URI[md5sum] = "071004c60c5d6f90354ad1b701013a0b"
+SRC_URI[sha256sum] = "eac6f85f9df9db2e6386906a6227eb2cd7b3245739561cad7d6dc1d5d021b96d"
 
 inherit autotools
 
