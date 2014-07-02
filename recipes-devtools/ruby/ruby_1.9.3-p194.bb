@@ -35,6 +35,8 @@ SRC_URI[sha256sum] = "46e2fa80be7efed51bd9cdc529d1fe22ebc7567ee0f91db4ab855438cf
 EXTRA_OECONF_GEMS = "--with-rubygemsdir=${datadir}/rubygems"
 EXTRA_OECONF_GEMS_virtclass-native = "--enable-load-relative"
 
+export DESTDIR="${D}"
+
 EXTRA_OECONF = "\
 	--enable-wide-getaddrinfo \
 	${EXTRA_OECONF_GEMS} \
@@ -49,9 +51,9 @@ EXTRA_OEMAKE = " \
 
 do_install() {
 	if [ ${PN} = "ruby" ]; then
-		oe_runmake 'DESTDIR=${D}' install install-cross
+		oe_runmake install install-cross
 	else
-		oe_runmake 'DESTDIR=${D}' install
+		oe_runmake install
 	fi
 }
 
