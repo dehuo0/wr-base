@@ -5,14 +5,16 @@ Upstream-Status: Pending
 This would avoid a implicit auto-detecting result.
 
 Signed-off-by: Ming Liu <ming.liu@windriver.com>
+Signed-off-by: Jackie Huang <jackie.huang@windriver.com>
 ---
- configure.in |   26 ++++++++++++++++----------
- 1 file changed, 16 insertions(+), 10 deletions(-)
+ configure.ac |   27 +++++++++++++++++----------
+ 1 files changed, 17 insertions(+), 10 deletions(-)
 
-diff -urpN a/configure.in b/configure.in
---- a/configure.in
-+++ b/configure.in
-@@ -73,6 +73,9 @@ AM_CONFIG_HEADER(config.h)
+diff --git a/configure.ac b/configure.ac
+index b1e18b4..8e13025 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -73,6 +73,9 @@ AC_CONFIG_HEADERS(config.h)
  dnl ***************************************************************************
  dnl Arguments
  
@@ -22,7 +24,7 @@ diff -urpN a/configure.in b/configure.in
  AC_ARG_WITH(libnet,
     [  --with-libnet=path      use path to libnet-config script],
     ,
-@@ -741,22 +744,25 @@ dnl ************************************
+@@ -768,22 +771,26 @@ dnl ***************************************************************************
  dnl libnet headers/libraries
  dnl ***************************************************************************
  AC_MSG_CHECKING(for LIBNET)
@@ -37,11 +39,7 @@ diff -urpN a/configure.in b/configure.in
 +        else
 +                LIBNET_CONFIG="$with_libnet/libnet-config"
 +        fi
- 
--if test -n "$LIBNET_CONFIG" -a -x "$LIBNET_CONFIG"; then
--        LIBNET_CFLAGS="`$LIBNET_CONFIG --defines`"
--        LIBNET_LIBS="`$LIBNET_CONFIG --libs`"
--        AC_MSG_RESULT(yes)
++ 
 +        if test -n "$LIBNET_CONFIG" -a -x "$LIBNET_CONFIG"; then
 +                LIBNET_CFLAGS="`$LIBNET_CONFIG --defines`"
 +                LIBNET_LIBS="`$LIBNET_CONFIG --libs`"
@@ -49,6 +47,11 @@ diff -urpN a/configure.in b/configure.in
 +        else
 +                AC_MSG_ERROR([Could not find libnet, and libnet support was explicitly enabled.])
 +        fi
+ 
+-if test -n "$LIBNET_CONFIG" -a -x "$LIBNET_CONFIG"; then
+-        LIBNET_CFLAGS="`$LIBNET_CONFIG --defines`"
+-        LIBNET_LIBS="`$LIBNET_CONFIG --libs`"
+-        AC_MSG_RESULT(yes)
  else
          LIBNET_LIBS=
          AC_MSG_RESULT(no)
@@ -58,3 +61,6 @@ diff -urpN a/configure.in b/configure.in
  if test "x$enable_spoof_source" = "xauto"; then
  	AC_MSG_CHECKING(whether to enable spoof source support)
          if test "x$LIBNET_LIBS" != "x"; then
+-- 
+1.7.1
+

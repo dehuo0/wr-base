@@ -2,6 +2,8 @@ logwritter: still free the unconsumed item during reloading configuration
 
 Otherwise we have no chance to free this stuff.
 
+Upstream-Status: Pending
+
 Signed-off-by: Xufeng Zhang <xufeng.zhang@windriver.com>
 ---
 --- a/lib/logwriter.c
@@ -10,7 +12,7 @@ Signed-off-by: Xufeng Zhang <xufeng.zhang@windriver.com>
  #include <iv.h>
  #include <iv_event.h>
  #include <iv_work.h>
-+#include "logproto-text-client.h"
++#include "logproto/logproto-text-client.h"
  
  typedef enum
  {

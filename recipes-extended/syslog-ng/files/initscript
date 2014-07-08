@@ -5,6 +5,8 @@
 # > update-rc.d syslog-ng defaults 5
 #
 
+# Source function library
+. /etc/init.d/functions
 
 syslog_ng=/usr/sbin/syslog-ng
 test -x "$syslog_ng" || exit 0
@@ -15,6 +17,8 @@ create_xconsole() {
   test -e /dev/xconsole || mknod -m 640 /dev/xconsole p
   test -x /sbin/restorecon && /sbin/restorecon /dev/xconsole
 }
+
+RETVAL=0
 
 case "$1" in
   start)
@@ -46,9 +50,13 @@ case "$1" in
     start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $syslog_ng
     echo "."
     ;;
+  status)
+    status $syslog_ng
+    RETVAL=$?
+    ;;
   *)
-    echo "Usage: /etc/init.d/syslog-ng {start|stop|reload|restart|force-reload}"
+    echo "Usage: $0 {start|stop|reload|restart|force-reload|status}"
     exit 1
 esac
 
-exit 0
+exit $RETVAL

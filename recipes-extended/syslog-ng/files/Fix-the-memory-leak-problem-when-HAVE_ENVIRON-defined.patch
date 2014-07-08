@@ -1,5 +1,7 @@
 Fix the memory leak problem when HAVE_ENVIRON is defined
 
+Upstream-Status: Pending
+
 Signed-off-by: Xufeng Zhang <xufeng.zhang@windriver.com>
 ---
 --- a/lib/gprocess.c

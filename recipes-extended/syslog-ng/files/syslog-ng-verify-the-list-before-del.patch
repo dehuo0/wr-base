@@ -3,6 +3,8 @@ Verify the validity of the pointer before delete it
 Otherwise, we got a crash at logqueue-fifo.c:344
   344 iv_list_del(&node->list);
 
+Upstream-Status: Pending
+
 Signed-off-by: Xufeng Zhang <xufeng.zhang@windriver.com>
 ---
 --- a/lib/logqueue-fifo.c
