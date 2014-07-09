@@ -11,11 +11,14 @@ Upstreamstatus: Inappropriate [embedded specific]
 
 Signed-off-by: Yao Zhao <yao.zhao@windriver.com>
 ---
+ makedefs |   27 +++++++++++----------------
+ 1 files changed, 11 insertions(+), 16 deletions(-)
+
 diff --git a/makedefs b/makedefs
-index 7993398..4f8fcb2 100644
+index dd5f256..e6fb795 100644
 --- a/makedefs
 +++ b/makedefs
-@@ -84,9 +84,6 @@
+@@ -87,9 +87,6 @@
  
  # Defaults for most sane systems
  
@@ -25,28 +28,30 @@ index 7993398..4f8fcb2 100644
  ARFL=rv
  
  # Ugly function to make our error message more visible among the
-@@ -273,12 +270,12 @@ case "$SYSTEM.$RELEASE" in
- 		;;
-     Linux.2*)	SYSTYPE=LINUX2
- 		# Postfix no longer needs DB 1.85 compatibility
--		if [ -f /usr/include/db.h ]
-+		if [ -f "$BUILD_SYSROOT"/usr/include/db.h ]
- 		then
- 		    : we are all set
--		elif [ -f /usr/include/db/db.h ]
-+		elif [ -f "$BUILD_SYSROOT"/usr/include/db/db.h ]
- 		then
--		    CCARGS="$CCARGS -I/usr/include/db"
-+		    CCARGS="$CCARGS -I"$BUILD_SYSROOT"/usr/include/db"
- 		else
- 		    # No, we're not going to try db1 db2 db3 etc.
- 		    # On a properly installed system, Postfix builds
-@@ -298,10 +295,10 @@ case "$SYSTEM.$RELEASE" in
- 		#     CCARGS="$CCARGS -DHAS_DBM -DPATH_NDBM_H='<gdbm/ndbm.h>'"
- 		#     GDBM_LIBS=gdbm
- 		# fi
--		SYSLIBS="-ldb"
-+		SYSLIBS="$SYSLIBS -ldb"
+@@ -293,12 +290,12 @@ case "$SYSTEM.$RELEASE" in
+ 		case "$CCARGS" in
+ 		 *-DNO_DB*) ;;
+ 		 *-DHAS_DB*) ;;
+-		 *) if [ -f /usr/include/db.h ]
++		 *) if [ -f "$BUILD_SYSROOT"/usr/include/db.h ]
+ 		    then
+ 			: we are all set
+-		    elif [ -f /usr/include/db/db.h ]
++		    elif [ -f "$BUILD_SYSROOT"/usr/include/db/db.h ]
+ 		    then
+-			CCARGS="$CCARGS -I/usr/include/db"
++			CCARGS="$CCARGS -I"$BUILD_SYSROOT"/usr/include/db"
+ 		    else
+ 			# No, we're not going to try db1 db2 db3 etc.
+ 			# On a properly installed system, Postfix builds
+@@ -307,12 +304,12 @@ case "$SYSTEM.$RELEASE" in
+ 			echo "Install the appropriate db*-devel package first." 1>&2
+ 			exit 1
+ 		    fi
+-		    SYSLIBS="-ldb"
++		    SYSLIBS="$SYSLIBS -ldb"
+ 		    ;;
+ 		esac
  		for name in nsl resolv $GDBM_LIBS
  		do
 -		    for lib in /usr/lib64 /lib64 /usr/lib /lib
@@ -54,16 +59,16 @@ index 7993398..4f8fcb2 100644
  		    do
  			test -e $lib/lib$name.a -o -e $lib/lib$name.so && {
  			    SYSLIBS="$SYSLIBS -l$name"
-@@ -321,7 +318,7 @@ case "$SYSTEM.$RELEASE" in
+@@ -332,7 +329,7 @@ case "$SYSTEM.$RELEASE" in
  		       if [ `expr "X$CCARGS" : "X.*-DNO_EPOLL"` -gt 0 ]
-                        then
-                            :
--                       elif [ ! -e /usr/include/sys/epoll.h ]
-+                       elif [ ! -e "$BUILD_SYSROOT"/usr/include/sys/epoll.h ]
-                        then
-                            echo CCARGS="$CCARGS -DNO_EPOLL"
-                        else
-@@ -345,19 +342,17 @@ int     main(int argc, char **argv)
+ 		       then
+ 			   :
+-		       elif [ ! -e /usr/include/sys/epoll.h ]
++		       elif [ ! -e "$BUILD_SYSROOT"/usr/include/sys/epoll.h ]
+ 		       then
+ 			   echo CCARGS="$CCARGS -DNO_EPOLL"
+ 		       else
+@@ -356,8 +353,6 @@ int     main(int argc, char **argv)
  }
  EOF
  			   ${CC-gcc} -o makedefs.test makedefs.test.c || exit 1
@@ -72,26 +77,33 @@ index 7993398..4f8fcb2 100644
  			   rm -f makedefs.test makedefs.test.[co]
  		       fi;;
  		esac
- 		;;
-     Linux.3*)	SYSTYPE=LINUX3
--		if [ -f /usr/include/db.h ]
-+		if [ -f "$BUILD_SYSROOT"/usr/include/db.h ]
- 		then
- 		    : we are all set
--		elif [ -f /usr/include/db/db.h ]
-+		elif [ -f "$BUILD_SYSROOT"/usr/include/db/db.h ]
- 		then
--		    CCARGS="$CCARGS -I/usr/include/db"
-+		    CCARGS="$CCARGS -I"$BUILD_SYSROOT"/usr/include/db"
- 		else
- 		    # On a properly installed system, Postfix builds
- 		    # by including <db.h> and by linking with -ldb
-@@ -366,10 +361,10 @@ EOF
- 		    echo "See the RELEASE_NOTES file for more information." 1>&2
- 		    exit 1
- 		fi
--		SYSLIBS="-ldb"
-+		SYSLIBS="$SYSLIBS -ldb"
+@@ -366,12 +361,12 @@ EOF
+ 		case "$CCARGS" in
+ 		 *-DNO_DB*) ;;
+ 		 *-DHAS_DB*) ;;
+-		 *) if [ -f /usr/include/db.h ]
++		 *) if [ -f "$BUILD_SYSROOT"/usr/include/db.h ]
+ 		    then
+ 			: we are all set
+-		    elif [ -f /usr/include/db/db.h ]
++		    elif [ -f "$BUILD_SYSROOT"/usr/include/db/db.h ]
+ 		    then
+-			CCARGS="$CCARGS -I/usr/include/db"
++			CCARGS="$CCARGS -I"$BUILD_SYSROOT"/usr/include/db"
+ 		    else
+ 			# On a properly installed system, Postfix builds
+ 			# by including <db.h> and by linking with -ldb
+@@ -379,7 +374,7 @@ EOF
+ 			echo "Install the appropriate db*-devel package first." 1>&2
+ 			exit 1
+ 		    fi
+-		    SYSLIBS="-ldb"
++		    SYSLIBS="$SYSLIBS -ldb"
+ 		    ;;
+ 		esac
+ 		for name in nsl resolv
+@@ -415,7 +410,7 @@ EOF
+ 		esac
  		for name in nsl resolv
  		do
 -		    for lib in /usr/lib64 /lib64 /usr/lib /lib
@@ -99,3 +111,6 @@ index 7993398..4f8fcb2 100644
  		    do
  			test -e $lib/lib$name.a -o -e $lib/lib$name.so && {
  			    SYSLIBS="$SYSLIBS -l$name"
+-- 
+1.7.1
+

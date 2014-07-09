@@ -1,13 +1,13 @@
 SUMMARY = "Postfix Mail Transport Agent"
 DESCRIPTION = "Postfix is Wietse Venema's mail server that started life at\
- IBM research as an alternative to the widely-used Sendmail program. \
-Postfix attempts to be fast, easy to administer, and secure. The outside\
- has a definite Sendmail-ish flavor, but the inside is completely\
- different."
+IBM research as an alternative to the widely-used Sendmail program. \
+Postfix attempts to be fast, easy to administer, and secure. The outsidei \
+has a definite Sendmail-ish flavor, but the inside is completely \
+different."
 
 HOMEPAGE= "http://www.postfix.org"
 SECTION = "console/network"
-DEPENDS = "virtual/db libpcre openssl postfix-native\
+DEPENDS = "virtual/db libpcre openssl postfix-native \
 	${@base_contains('DISTRO_FEATURES', 'ldap', 'openldap', '', d)} \
 	${@base_contains('DISTRO_FEATURES', 'sasl', 'cyrus-sasl', '', d)} \
 "
@@ -16,9 +16,7 @@ DEPENDS_virtclass-native = "virtual/db-native openssl-native libpcre-native"
 LICENSE = "IPL-1.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=64375f37431336ea1b1b3005fe3fa354"
 
-INC_PR = "r17"
-
-SRC_URI = "ftp://ftp.porcupine.org/mirrors/postfix-release/official/postfix-${PV}.tar.gz;name=postfix-${PV} \
+SRC_URI = "ftp://ftp.porcupine.org/mirrors/postfix-release/official/postfix-${PV}.tar.gz \
 	   file://makedefs.patch \
 	   file://install.patch \
 	   file://main.cf_2.0 \
