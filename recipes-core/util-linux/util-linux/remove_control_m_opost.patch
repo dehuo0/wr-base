@@ -1,20 +1,15 @@
-remove_control_m_opost
-
-This patch turns off the output processing when the output
+This patch turns off the output processing when the output 
 device is not actually a terminal.
 
-Signed-off-by: Jason Wessel <jason.wessel@windriver.com>
-Signed-off-by: Mark Hatle <mark.hatle@windriver.com>
-Signed-off-by: Chong Lu <Chong.Lu@windriver.com>
+Signed-off-by: Jason Wessel <jason.wessel@windriver.com>   
+
 ---
  term-utils/script.c |    9 +++++++++
  1 file changed, 9 insertions(+)
 
-diff --git a/term-utils/script.c b/term-utils/script.c
-index e2b3831..e970704 100644
 --- a/term-utils/script.c
 +++ b/term-utils/script.c
-@@ -969,5 +969,14 @@ getslave(void) {
+@@ -950,5 +950,14 @@ getslave(void) {
  	ioctl(slave, TIOCSWINSZ, (char *)&win);
  #endif
  	setsid();
@@ -29,6 +24,3 @@ index e2b3831..e970704 100644
 +	}
  	ioctl(slave, TIOCSCTTY, 0);
  }
--- 
-1.7.9.5
-

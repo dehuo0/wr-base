@@ -1,14 +1,7 @@
-socket_command_extension
-
-Signed-off-by: Jason Wessel <jason.wessel@windriver.com>
-Signed-off-by: Mark Hatle <mark.hatle@windriver.com>
-Signed-off-by: Chong Lu <Chong.Lu@windriver.com>
 ---
- term-utils/script.c |  373 ++++++++++++++++++++++++++++++++++++++++++++++++---
- 1 file changed, 356 insertions(+), 17 deletions(-)
+ term-utils/script.c |  388 ++++++++++++++++++++++++++++++++++++++++++++++++----
+ 1 file changed, 362 insertions(+), 26 deletions(-)
 
-diff --git a/term-utils/script.c b/term-utils/script.c
-index 88624b0..457725c 100644
 --- a/term-utils/script.c
 +++ b/term-utils/script.c
 @@ -58,6 +58,10 @@
@@ -31,7 +24,7 @@ index 88624b0..457725c 100644
  int	forceflg = 0;
  
  int die;
-@@ -144,7 +150,11 @@ usage(FILE *out)
+@@ -143,7 +149,11 @@ usage(FILE *out)
  		" -e, --return            return exit code of the child process\n"
  		" -f, --flush             run flush after each write\n"
  		"     --force             use output file even when it is a link\n"
@@ -43,7 +36,7 @@ index 88624b0..457725c 100644
  		" -t, --timing[=<file>]   output timing data to stderr (or to FILE)\n"
  		" -V, --version           output version information and exit\n"
  		" -h, --help              display this help and exit\n\n"), out);
-@@ -152,6 +162,110 @@ usage(FILE *out)
+@@ -151,6 +161,107 @@ usage(FILE *out)
  	exit(out == stderr ? EXIT_FAILURE : EXIT_SUCCESS);
  }
  
@@ -53,8 +46,6 @@ index 88624b0..457725c 100644
 +#define MAX_RCONS 5
 +int rcons[MAX_RCONS];
 +int rcons_in_use = 0;
-+fd_set rds;
-+fd_set master_rds;
 +int con_focus = -1;
 +char esc_chr = 1;
 +int use_cmd_fifo = 0;
@@ -63,9 +54,9 @@ index 88624b0..457725c 100644
 +char fifo_buf[MAX_FIFO_BUF];
 +char fifo_idx = 0;
 +
-+static void refresh_nsockhandle()
++static void refresh_nsockhandle(void)
 +{
-+	int temp = 0;
++    int temp = 0;
 +	int i;
 +
 +	if (use_socket_console && listen_sock > temp)
@@ -76,31 +67,30 @@ index 88624b0..457725c 100644
 +		if (rcons[i] > temp)
 +			temp = rcons[i];
 +
-+	nsockhandle = temp + 1;
++    nsockhandle = temp + 1;
 +}
 +
 +static void setRemoteSockOpts(int nsock)
 +{
-+	int on;
-+	/*
-+	 * set SO_LINGER socket option on socket so that it
-+	 * closes the connections gracefully, when required to
-+	 * close.
-+	 */
-+	on = 0;
-+	setsockopt (nsock, SOL_SOCKET, SO_LINGER, (void *)&on,
-+			sizeof on);
++    int on;
++    /*
++     * set SO_LINGER socket option on socket so that it
++     * closes the connections gracefully, when required to
++     * close.
++     */
++    on = 0;
++    setsockopt (nsock, SOL_SOCKET, SO_LINGER, (void *)&on,
++                sizeof on);
 +
-+	on = 1;
-+	/* Set TCP_NODELAY socket option to optimize communication */
-+	setsockopt(nsock, IPPROTO_TCP, TCP_NODELAY, (void *)&on,
-+			sizeof on);
++    on = 1;
++    /* Set TCP_NODELAY socket option to optimize communication */
++    setsockopt(nsock, IPPROTO_TCP, TCP_NODELAY, (void *)&on,
++               sizeof on);
 +}
 +
 +static void setup_listen_sock(void)
 +{
 +	struct sockaddr_in serv_addr;
-+	struct sockaddr name;
 +	int tmp;
 +	socklen_t val;
 +
@@ -108,7 +98,7 @@ index 88624b0..457725c 100644
 +	setRemoteSockOpts(listen_sock);
 +	tmp = 1;
 +	setsockopt(listen_sock, SOL_SOCKET, SO_REUSEADDR,
-+			(char *) &tmp, sizeof(tmp));
++			   (char *) &tmp, sizeof(tmp));
 +
 +	memset(&serv_addr, 0, sizeof(serv_addr));
 +	serv_addr.sin_family = AF_INET;
@@ -138,7 +128,7 @@ index 88624b0..457725c 100644
 +	if (mkfifo(console_fifo, 0700)) {
 +		if (errno != EEXIST) {
 +			fprintf(stderr, "Error creating %s fifo\n",
-+					console_fifo);
++				console_fifo);
 +			fail();
 +		}
 +	}
@@ -154,7 +144,7 @@ index 88624b0..457725c 100644
  /*
   * script -t prints time delays as floating point numbers
   * The example program (scriptreplay) that we provide to handle this
-@@ -189,7 +303,7 @@ main(int argc, char **argv) {
+@@ -188,7 +299,7 @@ main(int argc, char **argv) {
  	textdomain(PACKAGE);
  	atexit(close_stdout);
  
@@ -163,7 +153,7 @@ index 88624b0..457725c 100644
  		switch(ch) {
  		case 'a':
  			aflg = 1;
-@@ -212,6 +326,12 @@ main(int argc, char **argv) {
+@@ -211,6 +322,12 @@ main(int argc, char **argv) {
  		case 'q':
  			qflg = 1;
  			break;
@@ -176,7 +166,7 @@ index 88624b0..457725c 100644
  		case 't':
  			if (optarg)
  				if ((timingfd = fopen(optarg, "w")) == NULL)
-@@ -236,17 +356,31 @@ main(int argc, char **argv) {
+@@ -235,17 +352,31 @@ main(int argc, char **argv) {
  	argc -= optind;
  	argv += optind;
  
@@ -216,7 +206,7 @@ index 88624b0..457725c 100644
  	if (iflg) {
  		sigemptyset(&sa.sa_mask);
  		sa.sa_flags = 0;
-@@ -256,11 +390,11 @@ main(int argc, char **argv) {
+@@ -255,11 +386,11 @@ main(int argc, char **argv) {
  	}
  
  	shell = getenv("SHELL");
@@ -230,7 +220,7 @@ index 88624b0..457725c 100644
  		printf(_("Script started, file is %s\n"), fname);
  	fixtty();
  
-@@ -287,6 +421,8 @@ main(int argc, char **argv) {
+@@ -286,6 +417,8 @@ main(int argc, char **argv) {
  	}
  	if (child == 0) {
  
@@ -239,7 +229,7 @@ index 88624b0..457725c 100644
  		sigprocmask(SIG_SETMASK, &block_mask, NULL);
  		subchild = child = fork();
  		sigprocmask(SIG_SETMASK, &unblock_mask, NULL);
-@@ -312,15 +448,177 @@ main(int argc, char **argv) {
+@@ -311,15 +444,178 @@ main(int argc, char **argv) {
  	return EXIT_SUCCESS;
  }
  
@@ -259,23 +249,23 @@ index 88624b0..457725c 100644
 +	if (lastchr == esc_chr) {
 +		lastchr = 0;
 +		switch (ibuf[0]) {
-+			case 1:
-+				goto process_chars;
-+			case 'h':
-+				printf("Help for escape commands:\r\n");
-+				printf("   control-a - Send control-a\r\n");
-+				printf("   c - change console\r\n");
-+				printf("   x - exit\r\n");
-+				break;
-+			case 'x':
-+				fail();
-+				break;
-+			case 'c':
-+				con_focus++;
-+				if (con_focus >= rcons_in_use)
-+					con_focus = -1;
-+				printf("Changing to console: %i\r\n", con_focus + 1);
-+				break;
++		case 1:
++			goto process_chars;
++		case 'h':
++			printf("Help for escape commands:\r\n");
++			printf("   control-a - Send control-a\r\n");
++			printf("   c - change console\r\n");
++			printf("   x - exit\r\n");
++			break;
++		case 'x':
++			fail();
++			break;
++		case 'c':
++			con_focus++;
++			if (con_focus >= rcons_in_use)
++				con_focus = -1;
++			printf("Changing to console: %i\r\n", con_focus + 1);
++			break;
 +		}
 +		return 0;
 +	} else if (ibuf[0] == esc_chr) {
@@ -289,7 +279,7 @@ index 88624b0..457725c 100644
 +		if (wrt == -1) {
 +			int err = errno;
 +			fprintf (stderr, _("script: write error %d: %s\n"),
-+					err, strerror(err));
++				 err, strerror(err));
 +			fail();
 +		}
 +	} else {
@@ -330,7 +320,7 @@ index 88624b0..457725c 100644
 +			serv_addr.sin_port = htons((short)port);
 +			serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 +			if (connect(sock, (struct sockaddr *) &serv_addr,
-+						sizeof (serv_addr)) < 0) {
++				    sizeof (serv_addr)) < 0) {
 +				close(sock);
 +				fprintf(stderr,"Error connecting to local port %i\r\n", port);
 +				goto fifo_out;
@@ -344,7 +334,7 @@ index 88624b0..457725c 100644
 +		}
 +fifo_out:
 +		if (ibuf[0] != '\r' && ibuf[0] != '\n') {
-+			fifo_buf[fifo_idx] = ibuf[0];
++			*(fifo_buf + fifo_idx) = ibuf[0];
 +			fifo_idx++;
 +		}
 +		if (fifo_idx >= MAX_FIFO_BUF)
@@ -388,7 +378,8 @@ index 88624b0..457725c 100644
 +	int cc;
 +
 +	if ((cc = read(rcons[i], ibuf, 1)) > 0) {
-+		write(1, ibuf, cc);
++		if (write(1, ibuf, cc) < 1)
++			fail();
 +	} else {
 +		FD_CLR(rcons[i], &master_rds);
 +		refresh_nsockhandle();
@@ -418,7 +409,7 @@ index 88624b0..457725c 100644
  	FD_ZERO(&master_rds);
  	FD_SET(0, &master_rds);
  	while (die == 0) {
-@@ -345,7 +643,38 @@ doinput(void) {
+@@ -344,7 +640,38 @@ doinput(void) {
  		else
  			break;
  	}
@@ -457,7 +448,7 @@ index 88624b0..457725c 100644
  	done();
  }
  
-@@ -397,7 +726,8 @@ dooutput(FILE *timingfd) {
+@@ -396,7 +723,8 @@ dooutput(FILE *timingfd) {
  #endif
  	tvec = time((time_t *)NULL);
  	my_strftime(obuf, sizeof obuf, "%c\n", localtime(&tvec));
@@ -467,26 +458,43 @@ index 88624b0..457725c 100644
  
  	do {
  		if (die || errsv == EINTR) {
-@@ -434,6 +764,9 @@ dooutput(FILE *timingfd) {
+@@ -433,15 +761,17 @@ dooutput(FILE *timingfd) {
  			if (!cc)
  				continue;
  		}
-+		if (!fscript)
-+			continue;
-+
- 		fwrt = fwrite(obuf, 1, cc, fscript);
- 		if (fwrt < cc) {
- 			warn (_("cannot write script file"));
-@@ -451,7 +784,7 @@ dooutput(FILE *timingfd) {
+-		fwrt = fwrite(obuf, 1, cc, fscript);
+-		if (fwrt < cc) {
+-			warn (_("cannot write script file"));
+-			fail();
+-		}
+-		if (fflg) {
+-			fflush(fscript);
+-			if (tflg)
+-				fflush(timingfd);
++		if (fscript) {
++			fwrt = fwrite(obuf, 1, cc, fscript);
++			if (fwrt < cc) {
++				warn (_("cannot write script file"));
++				fail();
++			}
++			if (fflg) {
++				fflush(fscript);
++				if (tflg)
++					fflush(timingfd);
++			}
  		}
- 	} while(1);
+ 		wrt = write(STDOUT_FILENO, obuf, cc);
+ 		if (wrt < 0) {
+@@ -461,7 +791,7 @@ doshell(void) {
  
--	if (close_stream(timingfd) != 0)
+ 	getslave();
+ 	close(master);
+-	if (close_stream(fscript) != 0)
 +	if (fscript && (close_stream(fscript) != 0))
  		errx(EXIT_FAILURE, _("write error"));
- 	done();
- }
-@@ -514,6 +847,8 @@ fixtty(void) {
+ 	dup2(slave, STDIN_FILENO);
+ 	dup2(slave, STDOUT_FILENO);
+@@ -513,6 +843,8 @@ fixtty(void) {
  
  void
  fail(void) {
@@ -495,7 +503,7 @@ index 88624b0..457725c 100644
  
  	kill(0, SIGTERM);
  	done();
-@@ -528,16 +863,17 @@ done(void) {
+@@ -527,16 +859,17 @@ done(void) {
  			char buf[BUFSIZ];
  			tvec = time((time_t *)NULL);
  			my_strftime(buf, sizeof buf, "%c\n", localtime(&tvec));
@@ -516,7 +524,7 @@ index 88624b0..457725c 100644
  			printf(_("Script done, file is %s\n"), fname);
  #ifdef HAVE_LIBUTEMPTER
  		if (master >= 0)
-@@ -545,6 +881,9 @@ done(void) {
+@@ -544,6 +877,9 @@ done(void) {
  #endif
  	}
  
@@ -526,6 +534,3 @@ index 88624b0..457725c 100644
  	if(eflg) {
  		if (WIFSIGNALED(childstatus))
  			exit(WTERMSIG(childstatus) + 0x80);
--- 
-1.7.9.5
-

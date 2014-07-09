@@ -1,17 +1,10 @@
-no_switch_on_enter_env
-
-Signed-off-by: Jason Wessel <jason.wessel@windriver.com>
-Signed-off-by: Mark Hatle <mark.hatle@windriver.com>
-Signed-off-by: Chong Lu <Chong.Lu@windriver.com>
 ---
  term-utils/script.c |   12 ++++++++----
  1 file changed, 8 insertions(+), 4 deletions(-)
 
-diff --git a/term-utils/script.c b/term-utils/script.c
-index a36abc9..e2b3831 100644
 --- a/term-utils/script.c
 +++ b/term-utils/script.c
-@@ -542,9 +542,11 @@ handle_fifo_fd(char *ibuf)
+@@ -482,9 +482,11 @@ handle_fifo_fd(char *ibuf)
  			}
  			rcons[rcons_in_use] = sock;
  			FD_SET(rcons[rcons_in_use], &master_rds);
@@ -25,7 +18,7 @@ index a36abc9..e2b3831 100644
  			refresh_nsockhandle();
  		}
  fifo_out:
-@@ -579,9 +581,11 @@ handle_listen_sock(void)
+@@ -519,9 +521,11 @@ handle_listen_sock(void)
  			fprintf(stderr, "error on socket accept()\n");
  		} else {
  			FD_SET(rcons[rcons_in_use], &master_rds);
@@ -39,6 +32,3 @@ index a36abc9..e2b3831 100644
  			refresh_nsockhandle();
  		}
  	}
--- 
-1.7.9.5
-

@@ -1,14 +1,7 @@
-exit_clean_simics
-
-Signed-off-by: Jason Wessel <jason.wessel@windriver.com>
-Signed-off-by: Mark Hatle <mark.hatle@windriver.com>
-Signed-off-by: Chong Lu <Chong.Lu@windriver.com>
 ---
- term-utils/script.c |   63 ++++++++++++++++++++++++++++++++++++++++++++++++---
- 1 file changed, 60 insertions(+), 3 deletions(-)
+ term-utils/script.c |   60 ++++++++++++++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 58 insertions(+), 2 deletions(-)
 
-diff --git a/term-utils/script.c b/term-utils/script.c
-index b16ad10..cc7c84b 100644
 --- a/term-utils/script.c
 +++ b/term-utils/script.c
 @@ -107,6 +107,7 @@ char	line[] = "/dev/ptyXX";
@@ -19,7 +12,7 @@ index b16ad10..cc7c84b 100644
  int	eflg = 0;
  int	fflg = 0;
  int	qflg = 0;
-@@ -146,11 +147,13 @@ usage(FILE *out)
+@@ -145,11 +146,13 @@ usage(FILE *out)
  
  	fputs(_("\nOptions:\n"), out);
  	fputs(_(" -a, --append            append the output\n"
@@ -33,11 +26,11 @@ index b16ad10..cc7c84b 100644
  		" -p                      Use pipe command console (pipe is specified in env $CONSOLE_FIFO)\n"
  		" -q, --quiet             be quiet\n"
  		" -r                      Remove \\r from the generated log file\n"
-@@ -266,6 +269,30 @@ static void setup_cmd_fifo(void)
+@@ -262,6 +265,30 @@ static void setup_cmd_fifo(void)
  	setenv("CONSOLE_FIFO", console_fifo, 1);
  }
  
-+void
++static void
 +clean_exit(void)
 +{
 +	static int exit_cnt = 0;
@@ -58,13 +51,13 @@ index b16ad10..cc7c84b 100644
 +
 +static void
 +sig_term(int dummy) {
++	(void)(dummy); /* NOT USED suppress compiler warning */
 +	clean_exit();
 +}
-+
  /*
   * script -t prints time delays as floating point numbers
   * The example program (scriptreplay) that we provide to handle this
-@@ -303,7 +330,7 @@ main(int argc, char **argv) {
+@@ -299,7 +326,7 @@ main(int argc, char **argv) {
  	textdomain(PACKAGE);
  	atexit(close_stdout);
  
@@ -73,7 +66,7 @@ index b16ad10..cc7c84b 100644
  		switch(ch) {
  		case 'a':
  			aflg = 1;
-@@ -349,6 +376,18 @@ main(int argc, char **argv) {
+@@ -345,6 +372,18 @@ main(int argc, char **argv) {
  		case 'r':
  			rflg++;
  			break;
@@ -92,7 +85,7 @@ index b16ad10..cc7c84b 100644
  		case '?':
  		default:
  			usage(stderr);
-@@ -389,6 +428,18 @@ main(int argc, char **argv) {
+@@ -385,6 +424,18 @@ main(int argc, char **argv) {
  		sigaction(SIGTTOU, &sa, NULL);
  	}
  
@@ -111,33 +104,20 @@ index b16ad10..cc7c84b 100644
  	shell = getenv("SHELL");
  	if (shell == NULL || shell[0] != '/')
  		shell = _PATH_BSHELL;
-@@ -470,10 +521,15 @@ handle_stdin(char *ibuf)
- 				printf("Help for escape commands:\r\n");
- 				printf("   control-a - Send control-a\r\n");
- 				printf("   c - change console\r\n");
-+				printf("   m - switch to monitor console and interrupt\r\n");
- 				printf("   x - exit\r\n");
- 				break;
-+			case 'm':
-+				con_focus = -1;
-+				ibuf[0] = 3;  /* Send a control-c */
-+				goto process_chars;
- 			case 'x':
--				fail();
-+				clean_exit();
- 				break;
- 			case 'c':
- 				con_focus++;
-@@ -597,7 +653,8 @@ handle_remote_sock_input(char *ibuf, int i)
- 	int cc;
- 
- 	if ((cc = read(rcons[i], ibuf, 1)) > 0) {
--		write(1, ibuf, cc);
-+		if (write(1, ibuf, cc) < 1)
-+			fail();
- 	} else {
- 		FD_CLR(rcons[i], &master_rds);
- 		refresh_nsockhandle();
--- 
-1.7.9.5
-
+@@ -466,10 +517,15 @@ handle_stdin(char *ibuf)
+ 			printf("Help for escape commands:\r\n");
+ 			printf("   control-a - Send control-a\r\n");
+ 			printf("   c - change console\r\n");
++			printf("   m - switch to monitor console and interrupt\r\n");
+ 			printf("   x - exit\r\n");
+ 			break;
++		case 'm':
++			con_focus = -1;
++			ibuf[0] = 3;  /* Send a control-c */
++			goto process_chars;
+ 		case 'x':
+-			fail();
++			clean_exit();
+ 			break;
+ 		case 'c':
+ 			con_focus++;
