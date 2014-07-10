@@ -95,7 +95,6 @@ DEPENDS = "\
     pixman-native \
     pkgconfig-native \
     popt-native \
-    postfix-native \
     pseudo-native \
     python-native \
     python-pygobject-native \

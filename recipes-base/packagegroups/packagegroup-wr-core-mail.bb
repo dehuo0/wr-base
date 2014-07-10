@@ -15,6 +15,8 @@ PR = "r0"
 
 ALLOW_EMPTY_${PN} = "1"
 
-RDEPENDS_${PN} = " \
-    postfix \
-    "
+# It doesn't work with the newer db_6.0.30, but rpm requires this
+# version, so disable atm.
+# RDEPENDS_${PN} = " \
+#    postfix \
+#    "
