@@ -1,0 +1,65 @@
+From 2d3d57db76da338cafc93d93d7d01af561c3220d Mon Sep 17 00:00:00 2001
+From: Jackie Huang <jackie.huang@windriver.com>
+Date: Tue, 15 Jul 2014 22:14:34 -0700
+Subject: [PATCH 1/2] Redmine #5874: Do not compile users promises if pw functions not found
+
+This is needed for NetBSD, which has PAM, but not fgetpwent and
+friends.
+
+Upstream-Status: Backport
+
+Signed-off-by: Jackie Huang <jackie.huang@windriver.com>
+---
+ cf-agent/Makefile.am |    2 +-
+ configure.ac         |   15 ++++++++++++---
+ 2 files changed, 13 insertions(+), 4 deletions(-)
+
+diff --git a/cf-agent/Makefile.am b/cf-agent/Makefile.am
+index fa8b45c..627e1c6 100644
+--- a/cf-agent/Makefile.am
++++ b/cf-agent/Makefile.am
+@@ -76,7 +76,7 @@ libcf_agent_la_SOURCES = \
+ if !NT
+ libcf_agent_la_SOURCES += nfs.c nfs.h
+ 
+-if HAVE_PAM_USERPROGS
++if HAVE_USERS_PROMISE_DEPS
+   libcf_agent_la_SOURCES += verify_users_pam.c
+ else
+   libcf_agent_la_SOURCES += verify_users_stub.c
+diff --git a/configure.ac b/configure.ac
+index 8e9c9a1..92e748d 100755
+--- a/configure.ac
++++ b/configure.ac
+@@ -685,8 +685,17 @@ AS_IF([test "x$ac_cv_lib_pam_pam_start" = "xyes" && \
+       [have_pam=yes],
+       [have_pam=no]
+ )
+-AM_CONDITIONAL(HAVE_PAM_USERPROGS, [test "x$have_pam" = "xyes" && \
+-    test "x$have_userprogs" = "xyes"])
++AC_CHECK_FUNCS(fgetpwent fgetgrent)
++AS_IF([test "x$have_pam" = "xyes" && \
++    test "x$have_userprogs" = "xyes" && \
++    test "x$ac_cv_func_fgetpwent" = "xyes" && \
++    test "x$ac_cv_func_fgetgrent" = "xyes"],
++[
++    users_promises_ok=yes
++],[
++    users_promises_ok=no
++])
++AM_CONDITIONAL(HAVE_USERS_PROMISE_DEPS, [test "x$users_promises_ok" = "xyes"])
+ 
+ AC_CHECK_DECLS(getnetgrent, [], [], [[#include <netdb.h>]])
+ AC_CHECK_FUNCS(getnetgrent)
+@@ -1280,7 +1289,7 @@ else
+   AC_MSG_RESULT([-> libxml2: disabled])
+ fi
+ 
+-if test "x$have_pam" = "xyes" && test "x$have_userprogs" = "xyes"; then
++if test "x$users_promises_ok" = "xyes"; then
+   AC_MSG_RESULT([-> User promises: PAM/user* tools])
+ else
+   AC_MSG_RESULT([-> User promises: disabled])
+-- 
+1.7.1
+
