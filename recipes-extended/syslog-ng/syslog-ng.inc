@@ -48,6 +48,11 @@ do_configure_prepend() {
     eval "${@base_contains('DISTRO_FEATURES', 'largefile', '', 'sed -i -e "s/-D_LARGEFILE_SOURCE//" -e "s/-D_FILE_OFFSET_BITS=64//" ${S}/configure.in', d)}"
 }
 
+# workaround compile errors on qemuarm when enable-build=debug:
+# {standard input}: Assembler messages:
+# {standard input}:102: Error: invalid operands (.text and *UND* sections) for `-'
+CFLAGS_arm += "-O2"
+
 do_install_append() {
     install -d ${D}/${sysconfdir}/${BPN}
     install ${WORKDIR}/syslog-ng.conf ${D}${sysconfdir}/${BPN}/${BPN}.conf
