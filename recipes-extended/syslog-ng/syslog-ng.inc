@@ -22,6 +22,9 @@ SRC_URI = "http://www.balabit.com/downloads/files/syslog-ng/sources/${PV}/source
 
 inherit autotools systemd pkgconfig update-rc.d update-alternatives
 
+LIBTOOL = "${B}/${HOST_SYS}-libtool"
+EXTRA_OEMAKE = "'LIBTOOL=${LIBTOOL}'"
+
 EXTRA_OECONF = " \
     --enable-dynamic-linking \
     --disable-sub-streams \
