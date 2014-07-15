@@ -29,6 +29,7 @@ EXTRA_OECONF = " \
     --localstatedir=${localstatedir}/run/${BPN} \
     --sysconfdir=${sysconfdir}/${BPN} \
     --with-module-dir=${libdir}/${BPN} \
+    --with-sysroot=${STAGING_DIR_HOST} \
 "
 
 PACKAGECONFIG ??= "openssl \
