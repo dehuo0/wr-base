@@ -66,18 +66,16 @@ do_install_append() {
     rm -rf ${D}${localstatedir}/run
 }
 
-PACKAGES += "${PN}-tools"
+FILES_${PN} += "${datadir}/include/scl/ ${datadir}/xsd ${datadir}/tools"
 
-FILES_${PN} = "\
-    ${bindir}/* ${sbindir}/* ${libexecdir}/* ${libdir}/lib*${SOLIBS} \
-    ${sysconfdir} ${sharedstatedir} ${localstatedir} \
-    ${base_bindir}/* ${base_sbindir}/* \
-    ${base_libdir}/*${SOLIBS} \
-    ${datadir}/${BPN} ${libdir}/${BPN}/*${SOLIBS} \
-    ${datadir}/include/scl/ ${datadir}/xsd \
-"
-FILES_${PN}-dev += "${libdir}/${BPN}/lib*.la ${libdir}/${BPN}/*${SOLIBSDEV}"
-FILES_${PN}-tools = "${datadir}/tools"
+# This overcomes the syslog-ng rdepends on syslog-ng-dev QA Error
+PACKAGES =+ "${PN}-libs ${PN}-libs-dev ${PN}-libs-dbg"
+FILES_${PN}-libs = "${libdir}/${BPN}/*.so ${libdir}/libsyslog-ng-*.so*"
+FILES_${PN}-libs-dev = "${libdir}/${BPN}/lib*.la"
+FILES_${PN}-libs-dbg = "${libdir}/${BPN}/.debug"
+INSANE_SKIP_${PN}-libs = "dev-so"
+RDEPENDS_${PN} += "${PN}-libs"
+
 CONFFILES_${PN} = "${sysconfdir}/${BPN}.conf ${sysconfdir}/scl.conf"
 
 # syslog initscript is handled explicitly because order of
