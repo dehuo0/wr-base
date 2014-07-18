@@ -33,7 +33,7 @@ do_compile_ptest() {
 
 do_install_ptest() {
 	install -d ${D}${PTEST_PATH}
-	install -m 0755 ${S}/${TESTDIR}/genfile ${D}${PTEST_PATH}
-	install -m 0755 ${S}/${TESTDIR}/.libs/ezapi1 ${D}${PTEST_PATH}
+	install -m 0755 ${B}/${TESTDIR}/genfile ${D}${PTEST_PATH}
+	install -m 0755 ${B}/${TESTDIR}/.libs/ezapi1 ${D}${PTEST_PATH}
 	install -m 0755 ${WORKDIR}/ezapi1.sh ${D}${PTEST_PATH}
 }
