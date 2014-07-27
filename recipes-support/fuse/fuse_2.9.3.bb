@@ -22,6 +22,8 @@ SRC_URI[sha256sum] = "0beb83eaf2c5e50730fc553406ef124d77bc02c64854631bdfc86bfd64
 
 inherit autotools pkgconfig
 
+DEPENDS = "gettext-native"
+
 # Fusermount requires features from the util-linux version of mount.
 RDEPENDS_${PN} += "util-linux"
 
