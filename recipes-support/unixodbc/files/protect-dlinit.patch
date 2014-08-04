@@ -1,0 +1,13 @@
+--- unixODBC-2.3.1/DriverManager/SQLConnect.c-org	2014-07-21 17:04:38.278634602 +0800
++++ unixODBC-2.3.1/DriverManager/SQLConnect.c	2014-07-21 16:17:51.280708677 +0800
+@@ -1089,7 +1089,10 @@
+      * initialize libtool
+      */
+ 
++    mutex_lib_entry();      	/* warning, this doesn't protect from other libs in the application */
++				/* in their own threads calling dlinit(); */
+     lt_dlinit();
++    mutex_lib_exit();
+ 
+     /*
+      * open the lib

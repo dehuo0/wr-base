@@ -13,10 +13,11 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=d7b37bf80a3df5a65b355433ae36d206"
 
 DEPENDS = "libtool mysql5"
 
-PR = "r0"
+PR = "r1"
 
 SRC_URI = "ftp://ftp.unixodbc.org/pub/unixODBC/unixODBC-${PV}.tar.gz \
 	   file://do-not-use-libltdl-source-directory.patch \
+	   file://protect-dlinit.patch \
            "
 SRC_URI[md5sum] = "86788d4006620fa1f171c13d07fdcaab"
 SRC_URI[sha256sum] = "1f5be3edecff9e31072ef738ea1d8019594c4f0c2e3ab427e6eef153491db6a2"
