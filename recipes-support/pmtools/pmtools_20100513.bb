@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012 Wind River Systems, Inc.
+# Copyright (C) 2014 Wind River Systems, Inc.
 #
 SUMMARY = "Power management tools (ACPI tools, really)"
 DESCRIPTION = "This is a small collection of power management test and \
@@ -9,16 +9,17 @@ SECTION = "utils"
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=0636e73ff0215e8d672dc4c32c317bb3"
 
-PR = "r1"
-
-SRC_URI="http://www.lesswatts.org/patches/linux_acpi/pmtools-${PV}.tar.gz \
+SRC_URI="http://pkgs.fedoraproject.org/lookaside/pkgs/pmtools/pmtools-${PV}.tar.gz/d5ac3abf71b517ab059bfdc066891d35/pmtools-${PV}.tar.gz \
          file://fix-the-incorrect-include-path-for-acpixtract-Makefi.patch \
          file://do-not-strip-the-acpidump-executable.patch \
          file://pmtools-switch-to-dynamic-buffer-for-huge-ACPI-table.patch \
+         file://Makefile-fix-to-build-madt.patch \
 "
 
-SRC_URI[md5sum] = "10aa00d2ae9f1b4653e3995589a394a3"
-SRC_URI[sha256sum] = "91751774976e39f6237efd0326eb35196a9346220b92ad35894a33283e872748"
+SRC_URI[md5sum] = "d5ac3abf71b517ab059bfdc066891d35"
+SRC_URI[sha256sum] = "2fd79b0954ee5c28c4facb8d161116850a903454c400c77a9355318e2aba8070"
+
+S = "${WORKDIR}/${BPN}"
 
 COMPATIBLE_HOST = "(x86_64.*|i.86.*)-linux"
 
