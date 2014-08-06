@@ -3,8 +3,6 @@
 #
 require ${PN}.inc
 
-PR = "r0"
-
 LICENSE = "LGPLv2"
 LIC_FILES_CHKSUM = "file://license.txt;md5=6db3822fc7512e83087ba798da013692"
 
@@ -12,5 +10,5 @@ SRC_URI = "http://ftp.postgresql.org/pub/odbc/versions/src/${BPN}-${PV}.tar.gz;n
 	   file://remove-some-checks-for-cross-compiling.patch \
 	  "
 
-SRC_URI[psqlodbc.md5sum] = "0f4ac0e6b0755af2452764db4cfe4e8f"
-SRC_URI[psqlodbc.sha256sum] = "89c230f5068dcd17d5c6dab37d13ed03525040da534cc7f49564dceba00a9c2c"
+SRC_URI[psqlodbc.md5sum] = "3426173781606386856fcbda128b6c89"
+SRC_URI[psqlodbc.sha256sum] = "e8df6bad6d325339ba96bd78c82a68c2c5cddd1be534a220c978912bc0f6e9c4"
