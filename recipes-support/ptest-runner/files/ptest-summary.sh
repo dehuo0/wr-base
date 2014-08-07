@@ -72,17 +72,17 @@ function report_detail
     do
         echo "    ${package}"
         echo -n "        Passed:  "
-        sed -n "/BEGIN: ${package}\b/,/END: ${package}\b/p" ${ptest_run_log} \
+        sed -n "\CBEGIN: ${package}C,\CEND: ${package}Cp" ${ptest_run_log} \
             | grep -c "^PASS:"
         echo -n "        Failed:  "
-        sed -n "/BEGIN: ${package}\b/,/END: ${package}\b/p" ${ptest_run_log} \
+        sed -n "\CBEGIN: ${package}C,\CEND: ${package}Cp" ${ptest_run_log} \
             | grep -c "^FAIL:"
         if [ ${ptest_detail_failures} -eq 1 ]; then
-            sed -n "/BEGIN: ${package}\b/,/END: ${package}\b/p" ${ptest_run_log} \
+            sed -n "\CBEGIN: ${package}C,\CEND: ${package}Cp" ${ptest_run_log} \
                 | grep "^FAIL:" | sed 's/^/            /'
         fi
         echo -n "        Skipped: "
-        sed -n "/BEGIN: ${package}\b/,/END: ${package}\b/p" ${ptest_run_log} \
+        sed -n "\CBEGIN: ${package}C,\CEND: ${package}Cp" ${ptest_run_log} \
             | grep -c "^SKIP:"
         echo ""
     done
