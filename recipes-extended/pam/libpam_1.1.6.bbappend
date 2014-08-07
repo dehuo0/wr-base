@@ -31,8 +31,4 @@ do_lcl_rh_move () {
 
 addtask lcl_rh_move after do_unpack before do_patch
 
-# The module itself is put in the package by populate_packages_prepend()
-# in the recipe, but we need to put pam_console_apply in manually.
-#
-FILES_pam-plugin-console = "${sbindir}/pam_console_apply"
 
