@@ -6,7 +6,7 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 SRC_URI += "file://sysvinit_2.88dsf-add-service-script.patch"
 
-PRINC = "3"
+PR = "r500"
 
 do_install_append () {
 	install -m 0755 ${S}/debian/service/service ${D}${base_sbindir}/service
