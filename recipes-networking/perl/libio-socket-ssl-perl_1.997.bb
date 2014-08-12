@@ -11,27 +11,28 @@ mod_perl."
 
 SUMMARY = "Perl library for transparent SSL"
 HOMEPAGE = "http://search.cpan.org/dist/IO-Socket-SSL/"
-LIC_FILES_CHKSUM = "file://SSL.pm;beginline=2511;endline=2521;md5=b11d724916a421e8e92ad6ad51450bde"
-SRC_URI[io-socket-ssl-1.74.md5sum] = "6a9bc800d136af7709b2fb8dd2e4e8a5"
-SRC_URI[io-socket-ssl-1.74.sha256sum] = "e080fae93663322a49c2cdf3eeeb5cad7bd9bf7ad9dd9f0147ddb57573fc2800"
+LIC_FILES_CHKSUM = "file://META.yml;beginline=11;endline=11;md5=963ce28228347875ace682de56eef8e8"
 
 SECTION = "libs"
 LICENSE = "Artistic-1.0|GPLv1+"
 RDEPENDS_${PN} += "perl-module-scalar-util libnet-ssleay-perl"
-BBCLASSEXTEND = "native"
-PR = "r1"
 
-SRC_URI = "http://search.cpan.org/CPAN/authors/id/S/SU/SULLR/IO-Socket-SSL-${PV}.tar.gz;name=io-socket-ssl-${PV}"
+BBCLASSEXTEND = "native"
+
+SRC_URI = "http://search.cpan.org/CPAN/authors/id/S/SU/SULLR/IO-Socket-SSL-${PV}.tar.gz \
+           file://run-ptest \
+          "
+SRC_URI[md5sum] = "2a6268bb42da81e69d1c1feb2fcb0eea"
+SRC_URI[sha256sum] = "acdb67b5b63aea5b7e70c3e4c70a16128810329592b63753a38c794aff76a1dd"
 
 S = "${WORKDIR}/IO-Socket-SSL-${PV}"
 
-inherit cpan
+inherit cpan ptest
 
 PACKAGE_ARCH = "all"
 
 do_install_append () {
         mkdir -p ${D}${docdir}/${PN}/
-        mkdir -p ${D}/opt/${PN}/
         cp ${S}/BUGS ${D}${docdir}/${PN}/
         cp ${S}/Changes ${D}${docdir}/${PN}/
         cp ${S}/README ${D}${docdir}/${PN}/
@@ -39,9 +40,9 @@ do_install_append () {
         cp -pRP ${S}/certs ${D}${docdir}/${PN}/
         cp -pRP ${S}/example ${D}${docdir}/${PN}/
         cp -pRP ${S}/util ${D}${docdir}/${PN}/
-        cp -pRP ${S}/t ${D}/opt/${PN}/
 }
 
-PACKAGES =+ "${PN}-tests"
-
-FILES_${PN}-tests = "/opt/*"
+do_install_ptest () {
+	cp -r ${B}/t ${D}${PTEST_PATH}
+	cp -r ${B}/certs ${D}${PTEST_PATH}
+}
