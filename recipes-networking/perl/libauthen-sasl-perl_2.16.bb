@@ -16,15 +16,19 @@ DEPENDS = "perl"
 RDEPENDS_${PN} = "libdigest-hmac-perl"
 
 BBCLASSEXTEND = "native"
-PR = "r1"
 
-SRC_URI = "http://www.cpan.org/authors/id/G/GB/GBARR/Authen-SASL-${PV}.tar.gz;name=libAuthen-SASL-${PV}"
-SRC_URI[libAuthen-SASL-2.15.md5sum] = "35929abb2755cf479d548672800aebee"
-SRC_URI[libAuthen-SASL-2.15.sha256sum] = "e9c0be516302e75d7ecdf0ef20b89f58e8b43533ae39ded68ebfc72a23b077ee"
-
+SRC_URI = "http://www.cpan.org/authors/id/G/GB/GBARR/Authen-SASL-${PV}.tar.gz \
+           file://run-ptest \
+          "
+SRC_URI[md5sum] = "7c03a689d4c689e5a9e2f18a1c586b2f"
+SRC_URI[sha256sum] = "6614fa7518f094f853741b63c73f3627168c5d3aca89b1d02b1016dc32854e09"
 
 S = "${WORKDIR}/Authen-SASL-${PV}"
 
-inherit cpan
+inherit cpan ptest
+
+do_install_ptest () {
+    cp -r ${B}/t ${D}${PTEST_PATH}
+}
 
 PACKAGE_ARCH = "all"
