@@ -9,7 +9,7 @@ so you can write servers or clients for more complicated applications."
 
 SUMMARY = "Net::SSLeay - Perl extension for using OpenSSL"
 HOMEPAGE = "http://search.cpan.org/dist/Net-SSLeay/"
-LIC_FILES_CHKSUM = "file://README;beginline=274;endline=294;md5=8c04e66a0f1c70e2922ad38f94d9e765"
+LIC_FILES_CHKSUM = "file://README;beginline=274;endline=294;md5=49f415984b387be999ee2ad0e5c692fe"
 
 SECTION = "libs"
 LICENSE = "OpenSSL"
@@ -23,11 +23,12 @@ RDEPENDS_${PN} += " \
 	"
 
 BBCLASSEXTEND = "native"
-PR = "r2"
 
-SRC_URI = "http://search.cpan.org/CPAN/authors/id/M/MI/MIKEM/Net-SSLeay-${PV}.tar.gz;name=net-ssleay-${PV}"
-SRC_URI[net-ssleay-1.48.md5sum] = "4e10d9da28f26732e37807820bf72af5"
-SRC_URI[net-ssleay-1.48.sha256sum] = "630d857e797a11dd67433198b0458ad810d5f265d9ba0be5b93e73b629e4be6f"
+SRC_URI = "http://search.cpan.org/CPAN/authors/id/M/MI/MIKEM/Net-SSLeay-${PV}.tar.gz \
+           file://run-ptest \
+          "
+SRC_URI[md5sum] = "19600c036e9e0bbfbf9157f083e40755"
+SRC_URI[sha256sum] = "2fb1371120b85f018944d95736c107163f04ba56b6029c0709a2c3d6247b9c06"
 
 S = "${WORKDIR}/Net-SSLeay-${PV}"
 
@@ -36,6 +37,10 @@ EXTRA_CPANFLAGS = "LIBS='-L=${libdir} -L=${base_libdir}' \
               'EXTRALIBS=-lssl -lcrypto -lz' \
               'LDLOADLIBS=-lssl -lcrypto -lz'"
 
-inherit cpan
+inherit cpan ptest
+
+do_install_ptest() {
+	cp -r ${B}/t ${D}${PTEST_PATH}
+}
 
 FILES_${PN}-dbg =+ "${libdir}/perl/vendor_perl/*/auto/Net/SSLeay/.debug/"
