@@ -9,23 +9,22 @@ is transmitted. Sometimes real knowledge about a mime-type is need.\
 This module maintains a set of MIME::Type objects, which each describe \
 one known mime type."
 
-HOMEPAGE = "http://search.cpan.org/~markov/MIME-Types-1.35/"
+HOMEPAGE = "http://search.cpan.org/~markov/MIME-Types-${PV}"
 SECTION = "libraries"
 
 LICENSE = "Artistic-1.0|GPLv1+"
+LIC_FILES_CHKSUM = "file://META.yml;beginline=11;endline=11;md5=963ce28228347875ace682de56eef8e8"
 
-PR = "r1"
-
-SRC_URI = \
-"http://search.cpan.org/CPAN/authors/id/M/MA/MARKOV/MIME-Types-${PV}.tar.gz"
-
-inherit cpan
+SRC_URI = "http://search.cpan.org/CPAN/authors/id/M/MA/MARKOV/MIME-Types-${PV}.tar.gz \
+           file://run-ptest \
+          "
+SRC_URI[md5sum] = "e292bbf7756bb4999407f3f660697168"
+SRC_URI[sha256sum] = "22b6069d372d587b1f2ecc6d0aaf50fb5c64920caed8c214b9884e64538acc8f"
 
 S = "${WORKDIR}/MIME-Types-${PV}"
 
-LIC_FILES_CHKSUM = \
-"file://Makefile.PL;beginline=13;endline=13;md5=03941136f295d32adc19806b99d6370e\
- file://Makefile.PL;beginline=22;endline=22;md5=8bc093a25b2f49e8ad9701e21e4fb1ad"
+inherit cpan ptest
 
-SRC_URI[md5sum] = "0bba9902b326e03e376fe313b0fb239a"
-SRC_URI[sha256sum] = "166c47b795c35a8ccd8dcfda50ad06aa43c32c9bd277db2f1272175538d92daa"
+do_install_ptest () {
+	cp -r ${B}/t ${D}${PTEST_PATH}
+}
