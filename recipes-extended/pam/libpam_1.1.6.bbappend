@@ -22,9 +22,11 @@ SRC_URI[redhat.sha256sum] = "82bd4dc8c79d980bfc8421908e7562a63f0c65cc61152e2b73d
 # a separate task and use sh.
 #
 do_lcl_rh_move () {
+	SAVED_PWD=`pwd`; cd ${S}
 	if [ ! -e modules/pam_console ] ; then
 		mv ${WORKDIR}/pam-redhat-0.99.11/* modules
 	fi
+	cd ${SAVED_PWD}
 }
 
 addtask lcl_rh_move after do_unpack before do_patch
