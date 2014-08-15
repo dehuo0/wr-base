@@ -1,4 +1,4 @@
-IMAGE_INSTALL += "mysql5"
+IMAGE_INSTALL += "mariadb"
 IMAGE_INSTALL += "modphp"
 IMAGE_INSTALL += "phpmyadmin"
 IMAGE_INSTALL += "apache2"
