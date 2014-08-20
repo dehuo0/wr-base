@@ -27,6 +27,7 @@ EXTRA_OECONF = "\
 	--enable-pthreads \
 	--enable-openssl \
 	--disable-unicode \
+	LIBS="-lpthread" \
 	"
 
 inherit autotools pkgconfig
