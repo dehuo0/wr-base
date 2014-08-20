@@ -49,10 +49,7 @@ drop_caches()
 {
   sync
   sleep 1
-  old_value="`cat /proc/sys/vm/drop_caches`"
   echo 3 > /proc/sys/vm/drop_caches
-  sleep 1
-  echo "$old_value" > /proc/sys/vm/drop_caches
   sleep 1
 }
 
@@ -139,6 +136,6 @@ prepare_test()
 ##Delete tempfile
 clean_up()
 {
-  rm -f $FSDIR /tmp/hello
+  rm -rf $FSDIR /tmp/hello
 }
 

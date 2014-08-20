@@ -29,8 +29,8 @@ fi
 [ "$UID" -ne 0 ] && { echo "Root privilege is required."; exit 1; }
 
 #### ENV setup ####
-#Where is lmbench binaries? Default path is /opt/lmbench/bin/linux
-LMBENCH_BIN_PATH=${LMBENCH_BIN_PATH:-/opt/lmbench/bin/linux}
+#Where is lmbench binaries? Default path is /usr/bin
+LMBENCH_BIN_PATH=${LMBENCH_BIN_PATH:-/usr/bin}
 [ -d "$LMBENCH_BIN_PATH" ] || { echo "No such directory: ${LMBENCH_BIN_PATH}"; usage; exit 1; }
 export PATH=${LMBENCH_BIN_PATH}:${PATH}
 

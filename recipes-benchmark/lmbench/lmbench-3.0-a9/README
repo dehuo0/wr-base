@@ -4,33 +4,31 @@ Test steps:
 ===========
 [On build server]
 1) $ configure \
---enable-board=intel_xeon_5520_ioh --enable-kernel=standard --enable-rootfs=glibc_std \
---with-layer=path_to/wrll-runtime-testing
-
-$ make -C build wr-lmbench-test.addpkg
+--enable-board=intel_x86-64 --enable-kernel=standard --enable-rootfs=glibc_std \
+--enable-test=yes
 
 $ make fs
 
-After building, lmbench binaries and all the test scripts will be installed in ${prjdir}/export/dist/opt/lmbench directory.
+After building, lmbench binaries will be installed in ${prjdir}/export/dist/usr/bin
+and the test scripts will be installed in ${prjdir}/export/dist/opt/benchmark/os/wr-lmbench directory.
 
 2) boot target
 Roofs on local storage (such as harddisk) is strongly recommended for benchmark test.
 
 [On target]
-3) Test scripts are installed in /opt/wr-lmbench-test directory, read help info and setup necessary variables before testing.
-$ cd /opt/wr-lmbench-test
-$ ./wr-lmbench-test -h
+3) Test scripts are installed in /opt/benchmark/os/wr-lmbench directory, read help info and setup necessary variables before testing.
+$ /opt/benchmark/os/wr-lmbench/wr-lmbench-test.sh -h
 
 4) run test
-$ ./wr-lmbench-test
+$ /opt/benchmark/os/wr-lmbench/wr-lmbench-test.sh
 
-Test logs will be redirected into wr-lmbench-test/logs/ directory.
+Test logs will be redirected into /opt/benchmark/os/wr-lmbench/logs/ directory.
 
 5) Analyze test logs.
 
-Note: there are some variables used in wr-lmbench-test script.
+Note: there are some variables used in /opt/benchmark/os/wr-lmbench script.
 $LMBENCH_BIN_PATH:
-The path where the lmbench binaries are, which is /opt/lmbench/bin/linux in wrlinux by default.
+The path where the lmbench binaries are, which is /usr/bin in wrlinux by default.
 
 $MB:
 The memory size (in megabytes) used for testing, which will be auto detected if not set.
@@ -62,11 +60,11 @@ Test results of lmbench cases can be uploaded to benchmark database,
 which is managed by Li,Fupan (fupan.li@windriver.com).
 
 1) Process test logs.
-$ cd wr-lmbench-test
-$ ./dealt_log.sh path_to_test_logs temp_dir_for_dealt_logs
+$ cd /opt/benchmark/os/wr-lmbench
+$ ./generate_report.sh -d path_to_test_logs
 
 2) create config file for the test
-$ cd wr-lmbench-test/config
+$ cd /opt/benchmark/os/wr-lmbench/config
 $ cp template your_test_config
 
 Edit your_test_config file, which includes variables required benchmark database.
@@ -76,11 +74,11 @@ For example:
 case_name="lmbench"
 
 ## board: target name
-board="common_pc_64"
+board="intel-x86-64"
 
 ## test_id: unique name for each test run, which is used by database to manage test results
 ## recommend naming style: OS-kernel-rootfs-others
-test_id="wrlinux4.3-cgl-glibc_cgl"
+test_id="wrlinux7.0-standard-glibc_std"
 -------end------------
 
 3) upload test results to database
@@ -89,24 +87,6 @@ $ ./upload.sh -c config/your_test_config  -d temp_dir_for_dealt_logs
 Then test results will be uploaed in database.
 
 
-
-Review test results via Web:
-===========================
-Open web browser (firefox or chrome), input URL:
-http://pek-wrst.wrs.com/benchmark/
-
-Scenario 1: Review test results of one test run.
-----------
-Click on "case" and select "lmbench" --> "board" select "common_pc_64"
-Select the test name and test case name you want to review.
-Click on "filter".
-
-Scenario 2: Make comparison bewteen two test runs for the same test cases.
-----------
-Click on "case" and select "lmbench" --> "board" select "common_pc_64"
-Select the two test names to be compared.
-Select test cases to be compared.
-Click on "filter".
 
 Others:
 ==================================
