@@ -46,7 +46,6 @@ DEPENDS = "\
     gnutls-native \
     gperf-native \
     groff-native \
-    grub-efi-native \
     gtk-doc-stub-native \
     gtk-update-icon-cache-native \
     guile-native \
