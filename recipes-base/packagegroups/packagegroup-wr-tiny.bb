@@ -9,9 +9,9 @@ LICENSE = "MIT"
 DEPENDS = "virtual/kernel"
 PR = "r0"
 
-inherit packagegroup
-
 PACKAGE_ARCH = "${MACHINE_ARCH}"
+
+inherit packagegroup
 
 #
 # Set by the machine configuration with packages essential for device bootup
