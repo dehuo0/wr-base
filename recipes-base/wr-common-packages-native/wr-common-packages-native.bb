@@ -50,6 +50,9 @@ do_deploy_sstate () {
         cd ${B} || exit 1
         mkdir -p ${NATIVE_SS_OUTPUT_DIR} || exit 1
         bbnote "Creating ${NATIVE_SS_OUTPUT}"
+        # Remove the sub-directories and put the sstate files in the top dir.
+        find sstate-cache -type f -o -type l -exec mv {} sstate-cache/ \;
+        find sstate-cache -depth -type d -a ! -name 'sstate-cache' -exec rm -fr {} \;
         tar --exclude='*.tgz.done' --exclude='*.siginfo.done' \
             --transform 's#sstate-cache#${NATIVE_SS_OUTPUT_NAME}#' \
             -czhf "${NATIVE_SS_OUTPUT}" sstate-cache
