@@ -24,19 +24,6 @@ FEATURE_PACKAGES_wr-lsbtest = "packagegroup-wr-lsbtest"
 FEATURE_PACKAGES_ssh-sftp-servers ??= ""
 FEATURE_PACKAGES_wr-core-cut = "packagegroup-wr-core-cut"
 
-# useful information while tuning filesystems
-#
-do_wr_image_info() {
-    echo "Distro features:  ${DISTRO_FEATURES}"
-    echo "Image features:  ${IMAGE_FEATURES}"
-    echo "Image contents:  ${IMAGE_INSTALL}"
-    echo "Target arch:  ${TARGET_ARCH}"
-    echo "Machine arch:  ${MACHINE_ARCH}"
-    echo "Packages:  ${PACKAGE_INSTALL}"
-}
-
-addtask wr_image_info before do_rootfs
-
 # ensure we have password and group files before we do_rootfs
 check_for_passwd_group() {
     if [ ! -f $D/${sysconfdir}/passwd -o ! -f $D/${sysconfdir}/group ]; then
