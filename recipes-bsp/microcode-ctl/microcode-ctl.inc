@@ -35,6 +35,6 @@ FILES_${PN}-firmware = "\
     ${FIRMWARE_DIR}/microcode.dat \
 "
 
-RDEPENDS_${PN} = "${PN}-firmware"
+RDEPENDS_${PN} = "${PN}-firmware bash"
 
 
