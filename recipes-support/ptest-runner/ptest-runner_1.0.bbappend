@@ -12,3 +12,5 @@ do_install_append () {
         install -m 0755 ${WORKDIR}/ptest-summary.sh ${D}${bindir}/
         install -m 0755 ${WORKDIR}/ptest-diff.sh ${D}${bindir}/
 }
+
+RDEPENDS_${PN} += "bash"
