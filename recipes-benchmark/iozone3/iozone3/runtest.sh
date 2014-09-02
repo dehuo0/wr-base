@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 TC_PATH=`dirname $0`
 TC_SCRIPT=`basename $0`
