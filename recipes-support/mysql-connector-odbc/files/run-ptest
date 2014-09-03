@@ -1,0 +1,21 @@
+#!/bin/sh
+[ -f /etc/odbc.ini ] && mv /etc/odbc.ini /etc/odbc.ini.bak
+[ -f /etc/odbcinst.ini ] && mv /etc/odbcinst.ini /etc/odbcinst.ini.bak
+cp /etc/my.cnf /etc/my.cnf.bak
+
+sed -i "s:=\s*mysql:= root:" /etc/my.cnf
+cp ./test/odbc.ini /etc/
+cp ./test/odbcinst.ini /etc/
+
+/etc/init.d/mysqld restart
+export TEST_DSN=myodbc5w
+
+cd test
+for i in `ls` ; do
+	[ -x ./${i} ] && ./${i}|grep -e "ok"|sed -e "s/^ok/PASS:/" -e "s/^not ok/FAIL:/"
+done
+
+rm /etc/odbc.ini /etc/my.cnf /etc/odbcinst.ini
+[ -f /etc/odbc.ini.bak ] && mv /etc/odbc.ini.bak /etc/odbc.ini
+[ -f /etc/odbcinst.ini.bak ] && mv /etc/odbcinst.ini.bak /etc/odbcinst.ini
+[ -f /etc/my.cnf.bak ] && mv /etc/my.cnf.bak /etc/my.cnf
