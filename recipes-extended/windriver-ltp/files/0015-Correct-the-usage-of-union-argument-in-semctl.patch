@@ -1,0 +1,67 @@
+From 8e0c8e10c26fc524dd04833a6fb6dc1029e1a46c Mon Sep 17 00:00:00 2001
+From: Jin Li <jin.li@windriver.com>
+Date: Wed, 27 Nov 2013 14:16:00 +0800
+Subject: [PATCH 13/15] Correct the usage of union argument in semctl()
+
+Upstream-Status: Pending
+
+CQ: WIND00437969
+
+According to the semctl manual, the fourth argument of semctl should has the
+uion semun type if the cmd is SETVAL. Therefore all the "semctl(sem_id, 0,
+SETVAL, 1)" or "semctl(sem_id, 0, SETVAL, 0)" in sendmsg02.c should be replaced
+like this
+
+union semun {
+    int              val;    /* Value for SETVAL */
+    struct semid_ds *buf;    /* Buffer for IPC_STAT, IPC_SET */
+    unsigned short  *array;  /* Array for GETALL, SETALL */
+    struct seminfo  *__buf;  /* Buffer for IPC_INFO (Linux-specific) */
+};
+
+union semun arg;
+arg.val = 1 or 0;
+semctl(sem_id, 0, SETVAL, arg);
+
+Signed-off-by: Jin Li <jin.li@windriver.com>
+---
+ testcases/kernel/syscalls/sendmsg/sendmsg02.c | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/testcases/kernel/syscalls/sendmsg/sendmsg02.c b/testcases/kernel/syscalls/sendmsg/sendmsg02.c
+index c38d438..c4de3e9 100644
+--- a/testcases/kernel/syscalls/sendmsg/sendmsg02.c
++++ b/testcases/kernel/syscalls/sendmsg/sendmsg02.c
+@@ -126,10 +126,18 @@ static void reproduce(int seconds)
+ 	int child_count = 0;
+ 	int *child_pids;
+ 	int child_pid;
++    union semun {
++        int              val;    /* Value for SETVAL */
++        struct semid_ds *buf;    /* Buffer for IPC_STAT, IPC_SET */
++        unsigned short  *array;  /* Array for GETALL, SETALL */
++        struct seminfo  *__buf;  /* Buffer for IPC_INFO (Linux-specific) */
++    };
++	union semun arg;
+ 
+ 	child_pids = SAFE_MALLOC(cleanup, sizeof(int) * child_pairs * 2);
+ 
+-	if (semctl(sem_id, 0, SETVAL, 1) == -1)
++    arg.val = 1;
++	if (semctl(sem_id, 0, SETVAL, arg) == -1)
+ 		tst_brkm(TBROK | TERRNO, cleanup, "couldn't set semval to 1");
+ 
+ 	/* fork child for each client/server pair */
+@@ -168,7 +176,8 @@ static void reproduce(int seconds)
+ 	if (child_count == child_pairs*2)
+ 		sleep(seconds);
+ 
+-	if (semctl(sem_id, 0, SETVAL, 0) == -1) {
++    arg.val = 0;
++	if (semctl(sem_id, 0, SETVAL, arg) == -1) {
+ 		/* kill children if setting semval failed */
+ 		for (i = 0; i < child_count; i++)
+ 			kill(child_pids[i], SIGKILL);
+-- 
+1.8.1.4
+
