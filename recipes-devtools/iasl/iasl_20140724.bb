@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012 Wind River Systems, Inc.
+# Copyright (C) 2014 Wind River Systems, Inc.
 #
 SUMMARY = "Intel ASL compiler/decompiler"
 DESCRIPTION = "iasl compiles ASL (ACPI Source Language) into AML (ACPI Machine \
@@ -9,28 +9,31 @@ firmware. It also can disassemble AML, for debugging purposes. \
 HOMEPAGE = "https://www.acpica.org/"
 SECTION = "devel"
 LICENSE = "intel-acpi"
-LIC_FILES_CHKSUM = "file://aslcompiler.h;beginline=8;endline=115;md5=d7d6186ffb0917e0983f0e72d5e54aeb"
+LIC_FILES_CHKSUM = "file://source/compiler/aslcompiler.h;beginline=7;endline=114;md5=db853cc7b812206d2dca07ab0b893478"
 
-PR = "r0"
-
-DEPENDS = "bison flex"
+DEPENDS = "bison-native flex-native"
 
 SRC_URI = "https://www.acpica.org/download/acpica-unix-${PV}.tar.gz \
            file://iasl.1 \
+           file://Make-CC-definition-conditional.patch \
 "
 
-SRC_URI[md5sum] = "f80f0b079af06134769a2642b490cd30"
-SRC_URI[sha256sum] = "f3af776f968c29daa4f061d594d641297f3838805307d243385785b7326d324c"
+SRC_URI[md5sum] = "ae8e83b353510a73f24dc43840f6a662"
+SRC_URI[sha256sum] = "9afbaa84cf3e36e41c4746ed892aee5094dbdc8cc719d89583a81308c284ce84"
 
-S = "${WORKDIR}/acpica-unix-${PV}/compiler"
+S = "${WORKDIR}/acpica-unix-${PV}/"
 
 PARALLEL_MAKE = ""
 CFLAGS += "-D_LINUX -DACPI_ASL_COMPILER -I../include -I../compiler"
 
 COMPATIBLE_HOST = "(x86_64.*|i.86.*)-linux"
 
+do_compile() {
+        oe_runmake iasl
+}
+
 do_install() {
 	install -d ${D}${bindir} ${D}${mandir}/man1
-	install -m 0755 ${S}/iasl ${D}${bindir}
+	install -m 0755 ${S}/generate/unix/bin/iasl ${D}${bindir}
 	install -m 0644 ${WORKDIR}/iasl.1 ${D}${mandir}/man1
 }
