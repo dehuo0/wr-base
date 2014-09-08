@@ -36,7 +36,8 @@ NATIVE_SS_OUTPUT_DIR ?= "${DEPLOY_DIR}/sstate-native"
 NATIVE_SS_OUTPUT_NAME ?= "host-tools-${BUILD_ARCH}"
 NATIVE_SS_OUTPUT ?= "${DEPLOY_DIR}/sstate-native/host-tools-${BUILD_ARCH}.tar.gz"
 
-# The list of common native packages
+# The list of common native packages. This list is generated using
+# wrlinux-x/scripts/gen_common_native_package_list.sh
 require wr-common-packages-native.inc
 
 do_deploy_sstate () {
