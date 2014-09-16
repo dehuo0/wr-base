@@ -16,8 +16,7 @@ INITSCRIPT_PACKAGES = "microcode-ctl"
 INITSCRIPT_NAME_microcode-ctl = "microcode_ctl"
 INITSCRIPT_PARAMS_microcode-ctl = "start 80 2 3 4 5 . stop 20 0 1 6 ."
 
-SYSTEMD_PACKAGES = "microcode-ctl"
-SYSTEMD_SERVICE_microcode-ctl = "microcode_ctl.service"
+SYSTEMD_SERVICE_${PN} = "microcode_ctl.service"
 
 COMPATIBLE_HOST = "(i.86|x86_64).*-linux"
 
