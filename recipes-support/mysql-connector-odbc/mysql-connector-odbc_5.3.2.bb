@@ -24,6 +24,8 @@ RDEPENDS_${PN} = "unixodbc libmysqlclient-r mysql5"
 
 SRC_URI = "http://downloads.mysql.com/archives/get/file/${BP}-src.tar.gz \
            file://run-ptest \
+           file://set-LIB-SUBDIR.patch \
+           file://0001-building-only-once.patch \
           "
 SRC_URI[md5sum] = "389010eb70df759e6adb50983a31c9a3"
 SRC_URI[sha256sum] = "529bce82d308220379f658f1415bc88b35e9d084ddecd6bebe5fbb3b1fd48651"
@@ -38,6 +40,7 @@ EXTRA_OECMAKE += " -DDISABLE_GUI=yes \
                  -DRPM_BUILD=1 \
                  -DCMAKE_INSTALL_PREFIX='${datadir}/doc/mysql-connector-odbc' \
                  -DMYSQL_LINK_FLAGS='${LDFLAGS}' \
+                 -DBASE_LIBDIR='${libdir}' \
 "
 
 do_compile_prepend(){
@@ -46,10 +49,6 @@ do_compile_prepend(){
 }
 
 do_install_append(){
-    install -d ${D}${libdir}
-    mv ${D}${datadir}/doc/mysql-connector-odbc/${base_libdir}/*.so  ${D}${libdir}
-    rm -rf ${D}${datadir}/doc/mysql-connector-odbc/${base_libdir}/
-
     install -d ${D}${bindir}
     mv ${D}${datadir}/doc/mysql-connector-odbc/bin/*  ${D}${bindir}
     rm -rf ${D}${datadir}/doc/mysql-connector-odbc/bin/
