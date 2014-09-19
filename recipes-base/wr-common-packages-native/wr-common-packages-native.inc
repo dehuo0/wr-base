@@ -12,6 +12,7 @@ DEPENDS = "\
     bc-native \
     bdwgc-native \
     beecrypt-native \
+    binutils-native \
     bison-native \
     byacc-native \
     bzip2-native \
@@ -62,7 +63,6 @@ DEPENDS = "\
     libatomics-ops-native \
     libffi-native \
     libfontenc-native \
-    libmpc-native \
     libpcre-native \
     libpng-native \
     libtool-native \
@@ -78,7 +78,6 @@ DEPENDS = "\
     makedevs-native \
     mercurial-native \
     mkfontscale-native \
-    mpfr-native \
     mtools-native \
     nasm-native \
     ncurses-native \
@@ -96,6 +95,7 @@ DEPENDS = "\
     pkgconfig-native \
     popt-native \
     postfix-native \
+    prelink-native \
     pseudo-native \
     python-native \
     python-pygobject-native \
