@@ -17,7 +17,6 @@ DEPENDS = "\
     byacc-native \
     bzip2-native \
     ca-certificates-native \
-    cdrtools-native \
     cmake-native \
     cracklib-native \
     createrepo-native \
@@ -49,7 +48,6 @@ DEPENDS = "\
     gnu-config-native \
     gperf-native \
     groff-native \
-    grub-efi-native \
     gtk-doc-stub-native \
     gtk-update-icon-cache-native \
     guile-native \
