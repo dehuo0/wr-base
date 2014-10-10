@@ -42,6 +42,8 @@ RDEPENDS_${PN} = "\
     time \
     udev \
     util-linux \
+    util-linux-mount \
+    util-linux-umount \
     vim \
     kmod \
     which \
