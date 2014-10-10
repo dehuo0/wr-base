@@ -96,7 +96,7 @@ do_install () {
 
 PACKAGES =+ "${PN}-libs"
 
-FILES_${PN}-libs = "${libdir}/lib*.so ${libdir}/multipath/lib*.so"
+FILES_${PN}-libs = "${libdir}/lib*.so ${libdir}/lib*.so.* ${libdir}/multipath/lib*.so"
 
 FILES_${PN} += "/lib/udev/rules.d/62-multipath.rules \
                 /lib/systemd/system/multipathd.service"
