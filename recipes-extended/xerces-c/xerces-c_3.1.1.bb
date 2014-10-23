@@ -22,6 +22,8 @@ PR = "r2"
 
 inherit autotools pkgconfig
 
+PACKAGECONFIG ??= ""
+PACKAGECONFIG[curl] = "--with-curl, --without-curl, curl"
 PACKAGES =+ "lib${BPN} ${PN}-samples"
 FILES_lib${BPN} = "${libdir}/libxerces-c-3.1.so"
 FILES_${PN}-samples = "${bindir}/*"
