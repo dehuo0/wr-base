@@ -22,3 +22,10 @@ do_install () {
         install -m 755 ${S}/rcinit ${D}/${sysconfdir}/init.d/rcinit
     fi
 } 
+
+# As the recipe doesn't inherit systemd.bbclass, we need to set this variable
+# manually to avoid unnecessary postinst/preinst generated.
+python __anonymous() {
+    if not bb.utils.contains('DISTRO_FEATURES', 'sysvinit', True, False, d):
+        d.setVar("INHIBIT_UPDATERCD_BBCLASS", "1")
+}
