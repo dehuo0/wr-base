@@ -12,7 +12,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=89c0b58a3e01ce3d8254c9f59e78adfb"
 
 PR = "r0"
 
-DEPENDS = "virtual/libgl libxi libglu"
+DEPENDS = "virtual/libgl libxi libglu libxrandr"
 
 SRC_URI = "http://dfn.dl.sourceforge.net/sourceforge/freeglut/freeglut-${PV}.tar.gz \
 	"
