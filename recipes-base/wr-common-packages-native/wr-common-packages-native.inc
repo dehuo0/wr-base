@@ -20,6 +20,7 @@ DEPENDS = "\
     cmake-native \
     cracklib-native \
     createrepo-native \
+    cross-localedef-native \
     cryptodev-linux-native \
     cwautomacros-native \
     db-native \
@@ -27,6 +28,7 @@ DEPENDS = "\
     dbus-native \
     docbook-dsssl-stylesheets-native \
     docbook-sgml-dtd-3.1-native \
+    docbook-sgml-dtd-4.1-native \
     docbook-utils-native \
     dtc-native \
     e2fsprogs-native \
@@ -48,6 +50,7 @@ DEPENDS = "\
     gnu-config-native \
     gperf-native \
     groff-native \
+    grub-efi-native \
     gtk-doc-stub-native \
     gtk-update-icon-cache-native \
     guile-native \
@@ -55,6 +58,7 @@ DEPENDS = "\
     icu-native \
     intltool-native \
     jpeg-native \
+    kconfig-frontends-native \
     kern-tools-native \
     kmod-native \
     ldconfig-native \
@@ -65,10 +69,10 @@ DEPENDS = "\
     libpng-native \
     libtool-native \
     libunistring-native \
-    libxml2-native \
     libxml-namespacesupport-perl-native \
     libxml-parser-perl-native \
     libxml-simple-perl-native \
+    libxml2-native \
     libxslt-native \
     lzo-native \
     m4-native \
@@ -115,6 +119,7 @@ DEPENDS = "\
     sqlite3-native \
     subversion-native \
     syslinux-native \
+    systemd-systemctl-native \
     tcl-native \
     texinfo-dummy-native \
     tzcode-native \
