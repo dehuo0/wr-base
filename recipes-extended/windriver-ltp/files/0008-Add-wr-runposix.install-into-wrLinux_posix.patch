@@ -17,7 +17,7 @@ index 0000000..82e451d
 --- /dev/null
 +++ b/testcases/open_posix_testsuite/wrLinux_posix/wr-runposix.install
 @@ -0,0 +1,16 @@
-+#!/bin/bash
++#!/bin/sh
 +
 +cd `dirname $0` || \
 +{

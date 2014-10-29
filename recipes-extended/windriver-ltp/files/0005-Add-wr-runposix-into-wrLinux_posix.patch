@@ -27,7 +27,7 @@ index 0000000..cc6eb1e
 --- /dev/null
 +++ b/testcases/open_posix_testsuite/wrLinux_posix/wr-runposix
 @@ -0,0 +1,474 @@
-+#! /bin/bash
++#! /bin/sh
 +
 +# Copyright (c) 2012 Wind River Systems, Inc.
 +#
