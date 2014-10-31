@@ -18,7 +18,7 @@ COMPATIBLE_HOST = "(x86_64.*|i.86.*|powerpc.*|arm.*)-linux"
 
 # we need this because with mlib, there would be mixed arch
 # binaries in the package
-INSANE_SKIP_${PN} = "arch"
+INSANE_SKIP_${PN} = "arch build-deps file-rdeps"
 INSANE_SKIP_${PN}-dbg = "arch"
 
 python __anonymous () {
