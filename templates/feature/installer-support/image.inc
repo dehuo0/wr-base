@@ -11,3 +11,5 @@ IMAGE_INSTALL += "kmod"
 # that caused fs mount failed on glibc-small image,
 # use util-linux-mount to instead.
 IMAGE_INSTALL += "util-linux-mount"
+
+IMAGE_INSTALL += "init-ifupdown"
