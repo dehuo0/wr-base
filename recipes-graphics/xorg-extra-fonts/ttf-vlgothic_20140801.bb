@@ -2,6 +2,7 @@ SUMMARY = "Japanese TrueType fonts from Vine Linux"
 AUTHOR = "Contributor: noonov <noonov@gmail.com>"
 HOMEPAGE = "http://vlgothic.dicey.org/"
 LICENSE = "VLGOTHIC"
+LICENSE_FLAGS = "commercial"
 LIC_FILES_CHKSUM = "file://LICENSE.en;md5=66ecd0fd7e4da6246fa30317c7b66755"
 PR = "r0"
 
