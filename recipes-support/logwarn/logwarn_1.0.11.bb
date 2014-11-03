@@ -12,6 +12,12 @@ SRC_URI[sha256sum] = "fe5d7e5a40908489a243f2d7ccb37af583e74f072e3cb6012e5b3f3e68
 
 inherit autotools-brokensep
 
+# This directory is NOT volatile.
+#
+lcl_default_state_dir = "${localstatedir}/lib/logwarn"
+
+CFLAGS += '-DDEFAULT_STATE_DIR=\""${lcl_default_state_dir}\""'
+
 
 # Make sure some files exist for autoreconf.
 #
@@ -20,26 +26,10 @@ do_configure_prepend () {
         touch ${S}/ChangeLog
 }
 
-# Create a directory for logfile state info under /var/lib.
+# Create a directory for logfile state info, usually under /var/lib.
 #
 do_install_append () {
-        install -d ${D}${sysconfdir}/default/volatiles
-        cat > ${D}${sysconfdir}/default/volatiles/99_logwarn << EOF
-d root root 0755 /var/lib/logwarn none
-EOF
-}
-
-# This resets /var/lib/logwarn if the package is installed in a
-# running system.
-#
-pkg_postinst_${PN}() {
-    if [ -z "$D" ]; then
-	if type systemd-tmpfiles >/dev/null; then
-	    systemd-tmpfiles --create
-	elif [ -e ${sysconfdir}/init.d/populate-volatile.sh ]; then
-	    ${sysconfdir}/init.d/populate-volatile.sh update
-	fi
-    fi
+        install -d ${D}${lcl_default_state_dir}
 }
 
 # Make a package for the nagios plug-in (script).
