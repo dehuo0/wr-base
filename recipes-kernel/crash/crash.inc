@@ -37,6 +37,7 @@ SRC_URI += "file://gdb_build_jobs.patch"
 SRC_URI += "file://support-GRSecurity-in-x86.patch"
 SRC_URI += "file://fix-error-about-unused-value.patch"
 SRC_URI += "file://gdb-fix-to-use-correct-variable-in-elf32-arm.c.patch"
+SRC_URI += "file://crash-fix-loop-optimization.patch"
 
 LIC_FILES_CHKSUM = "file://COPYING3;md5=d32239bcb673463ab874e80d47fae504"
 LICENSE = "GPL-3.0"
