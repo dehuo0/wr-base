@@ -5,7 +5,8 @@ SECTION = "console/utils"
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://COPYING;md5=3b83ef96387f14655fc854ddc3c6bd57"
 
-SRC_URI = "http://logwarn.googlecode.com/files/logwarn-${PV}.tar.gz"
+SRC_URI = "http://logwarn.googlecode.com/files/logwarn-${PV}.tar.gz \
+           file://check_logwarn-script-has-bashism-so-use-bash.patch"
 
 SRC_URI[md5sum] = "bfe56260658dd8a69cb1f5286012c963"
 SRC_URI[sha256sum] = "fe5d7e5a40908489a243f2d7ccb37af583e74f072e3cb6012e5b3f3e68e0bad8"
@@ -36,4 +37,5 @@ do_install_append () {
 #
 PACKAGES += "${PN}-nagios"
 
+RDEPENDS_${PN}-nagios += "bash"
 FILES_${PN}-nagios = "/usr/lib/nagios"

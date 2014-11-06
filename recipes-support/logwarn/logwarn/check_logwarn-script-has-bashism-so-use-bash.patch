@@ -1,0 +1,41 @@
+check_logwarn script has bashism, so use bash instead of checking.
+
+[snip]
+possible bashism in check_logwarn line 33 (declare):
+declare -a LOGWARN_ARGS
+possible bashism in check_logwarn line 36 (bash arrays, ${name[0|*|@]}):
+while [ "${#PLUGIN_ARGS[@]}" -gt 0 ]; do
+possible bashism in check_logwarn line 38 (bash arrays, ${name[0|*|@]}):
+    FIRST_KEY="${KEYS[0]}"
+possible bashism in check_logwarn line 39 (bash arrays, ${name[0|*|@]}):
+    case "${PLUGIN_ARGS[$FIRST_KEY]}" in
+possible bashism in check_logwarn line 47 (bash arrays, ${name[0|*|@]}):
+        FILTER_COMMAND="${PLUGIN_ARGS[$NEXT_KEY]}"
+possible bashism in check_logwarn line 52 (bash arrays, ${name[0|*|@]}):
+        LOGWARN_ARGS=( "${LOGWARN_ARGS[@]}" "${PLUGIN_ARGS[@]}" )
+possible bashism in check_logwarn line 56 (bash arrays, ${name[0|*|@]}):
+        LOGWARN_ARGS=( "${LOGWARN_ARGS[@]}" "${PLUGIN_ARGS[$FIRST_KEY]}" )
+possible bashism in check_logwarn line 63 (bash arrays, ${name[0|*|@]}):
+"${LOGWARN}" "${LOGWARN_ARGS[@]}" >"${STDOUT_FILE}" 2>"${STDERR_FILE}"
+[snip]
+
+Upstream-Status: Pending
+
+Signed-off-by: Chong Lu <Chong.Lu@windriver.com>
+---
+ check_logwarn.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/check_logwarn.in b/check_logwarn.in
+index 60de76a..cbff78f 100644
+--- a/check_logwarn.in
++++ b/check_logwarn.in
+@@ -1,4 +1,4 @@
+-#!@BASH@
++#!/bin/bash
+ 
+ # Constants
+ NAME="check_logwarn"
+-- 
+1.9.1
+
