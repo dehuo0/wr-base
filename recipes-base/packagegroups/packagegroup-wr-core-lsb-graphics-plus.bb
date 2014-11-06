@@ -25,4 +25,4 @@ RDEPENDS_${PN} = " \
 # mips64 with n64 has host: mips64-wrsmllib64-linux
 # qemumips has host: mips-wrs-linux
 # qemumips-64 has host: mips64-wrs-linux
-COMPATIBLE_HOST = '((x86_64.*|i.86.*|powerpc.*|arm.*|mips-.*|mips32.*)-linux|mips64.*-linux-gnun32)'
+COMPATIBLE_HOST = '((x86_64.*|i.86.*|powerpc.*|arm.*|aarch64.*|mips-.*|mips32.*)-linux|mips64.*-linux-gnun32)'
