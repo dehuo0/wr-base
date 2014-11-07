@@ -83,6 +83,7 @@ do_install() {
 
 PACKAGES =+ " libqt-mt3 qt-x11-plugins-imageformats qt-x11-plugins-sqldrivers qt-x11-plugins-designer \
              qt-x11-designer qt-x11-assistant qt-x11-qvfb qt-x11-qtconfig"
+RPROVIDES_libqt-mt3 = "${PN}"
 FILES_libqt-mt3 = "${libdir}/libqt-mt.so.*"
 FILES_${PN}-dev += "${libdir}/qt3/*.prl"
 FILES_qt-x11-plugins-imageformats = "${libdir}/qt3/plugins/imageformats/*.so"
