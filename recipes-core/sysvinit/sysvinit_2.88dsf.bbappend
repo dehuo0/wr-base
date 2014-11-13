@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012 Wind River Systems, Inc.
+# Copyright (C) 2012-2014 Wind River Systems, Inc.
 #
 # LOCAL REV: add WR specific scripts
 #
@@ -13,3 +13,7 @@ do_install_append () {
 	install -m 0755 ${S}/debian/service/service.8 ${D}${mandir}/man8
 	ln -sf ${base_sbindir}/service ${D}/${base_bindir}/service
 }
+
+# handy to include /etc/os-release
+#
+RRECOMMENDS_${PN} += "os-release"
