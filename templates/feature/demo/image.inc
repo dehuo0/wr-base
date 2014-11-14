@@ -3,10 +3,6 @@
 # in 5.0.
 #
 
-# layer oe-core debug plus layer wr-tools-debug debug
-#
-require templates/feature/debug/image.inc
-
 # The machine and the distro have to support alsa for us
 # to include related packages.
 #

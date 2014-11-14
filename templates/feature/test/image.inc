@@ -5,7 +5,3 @@
 IMAGE_INSTALL += "ltp"
 IMAGE_INSTALL += "lmbench"
 IMAGE_INSTALL += "iozone3"
-
-# using the test template implies --with-template=feature/ptest as well
-##
-require templates/feature/ptest/image.inc
