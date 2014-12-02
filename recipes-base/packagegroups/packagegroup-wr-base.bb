@@ -61,4 +61,5 @@ RDEPENDS_${PN}-net = "\
     openssh-scp \
     openssh-ssh \
     openssh-sshd \
+    rfkill \
     "
