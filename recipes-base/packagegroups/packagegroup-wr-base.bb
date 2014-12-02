@@ -44,6 +44,8 @@ RDEPENDS_${PN} = "\
     util-linux \
     util-linux-mount \
     util-linux-umount \
+    util-linux-fstrim \
+    util-linux-hwclock \
     vim \
     kmod \
     which \
