@@ -29,6 +29,8 @@ RDEPENDS_${PN} = "\
     findutils \
     gawk \
     grep \
+    iproute2 \
+    kmod \
     logrotate \
     mingetty \
     mktemp \
@@ -47,9 +49,7 @@ RDEPENDS_${PN} = "\
     util-linux-fstrim \
     util-linux-hwclock \
     vim \
-    kmod \
     which \
-    iproute2 \
     "
 
 # Minimal network environment
