@@ -49,6 +49,7 @@ RDEPENDS_${PN} = "\
     util-linux-fstrim \
     util-linux-hwclock \
     vim \
+    vlock \
     which \
     "
 
