@@ -1,0 +1,8 @@
+This feature causes native qemu to build with SDL support.
+It's enabled by default so that native qemu with graphic consoles doesn't hang.
+
+To disable it, add
+
+--without-template=feature/qemu-sdl
+
+as a configure option.
