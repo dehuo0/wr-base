@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2012 Wind River Systems, Inc.
+# Copyright (C) 2012, 2015 Wind River Systems, Inc.
 #
 SUMMARY = "A set of tools to manage multipath devices using device-mapper"
 
@@ -77,6 +77,16 @@ S = "${WORKDIR}/git/"
 SRC_URI[md5sum] = "ec167b9f21edd94c8863c3e077e8ef02"
 SRC_URI[sha256sum] = "27865fa50f3fb14c0f4eaae6bed9d7c5abd6bc1ac4efebe346e70fe8f572bc67"
 
+inherit systemd
+
+#  For sysvinit we supply an init file, but don't invoke it,
+#  so for systemd we disable the service.  The service file is
+#  in the source and assumes bindir is /usr/bin.
+#
+SYSTEMD_SERVICE_${PN} = "multipathd.service"
+SYSTEMD_AUTO_ENABLE = "disable"
+
+
 do_compile () {
     oe_runmake DESTDIR=${D} LIB=${libdir} \
     rcdir=${sysconfdir}/init.d/ OPTFLAGS="${CFLAGS}" all
@@ -85,6 +95,7 @@ do_compile () {
 do_install () {
     make DESTDIR=${D} \
     LIB=${libdir} rcdir=${sysconfdir}/init.d \
+    unitdir=${systemd_unitdir}/system \
     bindir=${bindir} install
 
     install -d ${D}${sysconfdir}
@@ -98,8 +109,7 @@ PACKAGES =+ "${PN}-libs"
 
 FILES_${PN}-libs = "${libdir}/lib*.so ${libdir}/lib*.so.* ${libdir}/multipath/lib*.so"
 
-FILES_${PN} += "/lib/udev/rules.d/62-multipath.rules \
-                /lib/systemd/system/multipathd.service"
+FILES_${PN} += "/lib/udev/rules.d/62-multipath.rules"
 FILES_${PN}-dbg += "${libdir}/.debug/* ${libdir}/multipath/.debug/* "
 FILES_${PN}-dev += "${libdir}/lib*.la"
 
