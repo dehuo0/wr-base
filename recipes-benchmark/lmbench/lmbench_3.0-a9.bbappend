@@ -19,6 +19,8 @@ SRC_URI += "file://lmbench-3.0-a9_wr_integration.patch \
 
 WR_LMBENCH ?= "/opt/benchmark/os/wr-lmbench"
 
+inherit update-alternatives
+
 do_install_append () {
 	install -d ${D}/${WR_LMBENCH}
 	install -m 0755 ${WORKDIR}/wr-lmbench-test.sh ${D}/${WR_LMBENCH}
@@ -28,7 +30,13 @@ do_install_append () {
 	install -m 0664 ${WORKDIR}/README ${D}/${WR_LMBENCH}/
 	cp -r ${WORKDIR}/config ${D}/${WR_LMBENCH}/
 	cp -r ${WORKDIR}/scripts ${D}/${WR_LMBENCH}/
+	mv ${D}${bindir}/hello ${D}${bindir}/hello.lmbench
 }
+
+ALTERNATIVE_${PN} = "hello"
+ALTERNATIVE_PRIORITY = "100"
+ALTERNATIVE_LINK_NAME[hello] = "${bindir}/hello"
+ALTERNATIVE_TARGET[hello] = "${bindir}/hello.lmbench"
 
 FILES_${PN} += "${WR_LMBENCH}"
 
