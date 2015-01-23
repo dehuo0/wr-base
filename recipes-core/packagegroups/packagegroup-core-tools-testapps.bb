@@ -23,6 +23,7 @@ KEXECTOOLS ?= "kexec"
 KEXECTOOLS_mips ?= ""
 KEXECTOOLS_mipsel ?= ""
 KEXECTOOLS_mips64 ?= ""
+KEXECTOOLS_mips64n32 ?= ""
 KEXECTOOLS_powerpc ?= ""
 KEXECTOOLS_e5500-64b ?= ""
 
