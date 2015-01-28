@@ -28,8 +28,11 @@ CFLAGS += "-D_LINUX -DACPI_ASL_COMPILER -I../include -I../compiler"
 
 COMPATIBLE_HOST = "(x86_64.*|i.86.*)-linux"
 
+# By setting NOOPT we suppress forcing -O2 and setting _FORTIFY_SOURCE=2.  Let the
+# optimization and security cflags set them.
+#
 do_compile() {
-        oe_runmake iasl
+        oe_runmake iasl NOOPT=TRUE
 }
 
 do_install() {
