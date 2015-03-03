@@ -34,3 +34,8 @@ ALTERNATIVE_${PN} = "sendmail"
 ALTERNATIVE_TARGET[sendmail] = "${bindir}/msmtp"
 ALTERNATIVE_LINK_NAME[sendmail] = "${sbindir}/sendmail"
 ALTERNATIVE_PRIORITY = "100"
+
+pkg_postinst_${PN}_linuxstdbase () {
+       # /usr/lib/sendmail is required by LSB specification
+       [ ! -L /usr/lib/sendmail ] && ln -sf ${sbindir}/sendmail /usr/lib
+}
