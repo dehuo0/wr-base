@@ -37,5 +37,5 @@ ALTERNATIVE_PRIORITY = "100"
 
 pkg_postinst_${PN}_linuxstdbase () {
        # /usr/lib/sendmail is required by LSB specification
-       [ ! -L /usr/lib/sendmail ] && ln -sf ${sbindir}/sendmail /usr/lib
+       [ ! -L $D/usr/lib/sendmail ] && ln -sf ${sbindir}/sendmail $D/usr/lib
 }
