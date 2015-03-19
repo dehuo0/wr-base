@@ -61,9 +61,27 @@ PACKAGECONFIG[libcap] = "--enable-libcap,--disable-libcap,libcap,"
 PACKAGECONFIG[crypto] = "--enable-crypto,--disable-crypto,openssl,"
 PACKAGECONFIG[selinux] = "--enable-selinux,--disable-selinux,libselinux,"
 PACKAGECONFIG[acl] = "--enable-acl,--disable-acl,acl,"
-PACKAGES += "open-posix-testsuite"
+PACKAGES += "open-posix-testsuite-dbg open-posix-testsuite"
 
 FILES_open-posix-testsuite += "/opt/open_posix_testsuite/"
+
+FILES_open-posix-testsuite-dbg += "\
+     /opt/open_posix_testsuite/*/.debug \
+     /opt/open_posix_testsuite/*/*/.debug \
+     /opt/open_posix_testsuite/*/*/*/.debug \
+     /opt/open_posix_testsuite/*/*/*/*/.debug \
+     "
+
+### These may be in .bb file after package is upgraded
+###
+FILES_${PN}-dbg += "\
+     /opt/ltp/testcases/*/.debug \
+     /opt/ltp/testcases/*/*/.debug \
+     /opt/ltp/testcases/*/*/*/.debug \
+     "
+INSANE_SKIP_${PN} += "already-stripped"
+###
+
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 RDEPENDS_open-posix-testsuite += "eglibc-utils"
