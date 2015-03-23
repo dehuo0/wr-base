@@ -18,8 +18,7 @@ SRC_URI[redhat.sha256sum] = "82bd4dc8c79d980bfc8421908e7562a63f0c65cc61152e2b73d
 
 
 # If necessary, move pam-redhat modules to where they will be built.
-# Because do_unpack and do_patch are python (probably), we create
-# a separate task and use sh.
+# We create a local function and use sh.
 #
 do_lcl_rh_move () {
 	SAVED_PWD=`pwd`; cd ${S}
@@ -29,6 +28,12 @@ do_lcl_rh_move () {
 	cd ${SAVED_PWD}
 }
 
-addtask lcl_rh_move after do_unpack before do_patch
+# Now, we define our own do_patch.  We rely on the fact
+# that the default do_patch just invokes patch_do_patch.
+#
+python do_patch () {
+    bb.build.exec_func('do_lcl_rh_move', d)
+    bb.build.exec_func('patch_do_patch', d)
+}
 
 
