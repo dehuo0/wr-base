@@ -14,7 +14,8 @@ LICENSE = "Artistic-1.0|GPLv2+"
 
 #use sendmail which is in msmtp package
 RDEPENDS_${PN} += "perl perl-module-mime-base64 perl-module-mime-quotedprint"
-RDEPENDS_${PN} += "libproc-waitstat-perl libmime-types-perl msmtp"
+RDEPENDS_${PN} += "libproc-waitstat-perl libmime-types-perl msmtp \
+                   perl-module-filehandle perl-module-posix"
 
 PR = "r1"
 
