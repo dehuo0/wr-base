@@ -5,22 +5,20 @@
 # directory and .git is removed from the last directory name, if present.
 
 python __anonymous () {
-    import re
-
     if d.getVar('BB_NO_NETWORK', True) == "1":
         return
 
     pkgname = d.expand(d.getVar('PN'))
-    newnet = d.getVarFlag('URLMAP', pkgname)
+    newsrc = d.getVarFlag('URLMAP', pkgname)
 
-    if not newnet:
-        newnet = d.getVar('URLMAP', True)
+    if not newsrc:
+        newsrc = d.getVar('URLMAP', True)
 
-    if not newnet:
+    if not newsrc:
         return
 
     srcuri = d.getVar('SRC_URI', True)
-    scheme, network, path, user, passwd, param = bb.fetch.decodeurl(srcuri);
+    scheme, network, path, user, passwd, param = bb.fetch.decodeurl(srcuri)
 
 
     # Drop hard-coded protocol from param if it exists (like protocol=file)
@@ -37,10 +35,17 @@ python __anonymous () {
     dirs = path.split("/")
     repo = "/" + dirs[-1]
 
-    if (re.search(".git$", repo)):
+    if (repo.endswith(".git")):
        repo = repo[:-4]
 
-    result = bb.fetch.encodeurl([scheme, newnet, repo, user, passwd, param])
+    scheme, network, path, user, passwd, newparam = bb.fetch.decodeurl(newsrc)
+    path += repo
+
+    # Copy or overwrite any params with the new param values.
+    for part in newparam:
+        param[part] = newparam[part]
+
+    result = bb.fetch.encodeurl([scheme, network, path, user, passwd, param])
     bb.debug(2, "Changed %s to %s for package %s" % (srcuri, result, pkgname))
     d.setVar("SRC_URI", result);
 }
