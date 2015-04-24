@@ -12,7 +12,7 @@ PR = "r5"
 inherit wrlinux-image
 
 IMAGE_INSTALL = " \
-    kernel-modules \
+    ${@bb.utils.contains('IMAGE_ENABLE_CONTAINER', '1', '', 'kernel-modules', d)} \
     packagegroup-base-extended \
     packagegroup-wr-base \
     packagegroup-wr-base-net \

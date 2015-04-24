@@ -11,6 +11,11 @@ PR = "r2"
 
 inherit wrlinux-image
 
-IMAGE_INSTALL = "packagegroup-wr-boot packagegroup-wr-base packagegroup-wr-base-net kernel-modules"
+IMAGE_INSTALL = " \
+    packagegroup-wr-boot \
+    packagegroup-wr-base \
+    packagegroup-wr-base-net \
+    ${@bb.utils.contains('IMAGE_ENABLE_CONTAINER', '1', '', 'kernel-modules', d)} \
+"
 
 NO_RECOMMENDATIONS = "1"

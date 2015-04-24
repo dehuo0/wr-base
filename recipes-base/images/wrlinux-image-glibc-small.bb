@@ -25,5 +25,5 @@ IMAGE_FEATURES += "debug-tweaks"
 #
 IMAGE_INSTALL = "\
     packagegroup-core-boot \
-    kernel-modules \
+    ${@bb.utils.contains('IMAGE_ENABLE_CONTAINER', '1', '', 'kernel-modules', d)} \
     "
