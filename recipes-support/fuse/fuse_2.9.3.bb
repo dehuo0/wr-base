@@ -16,6 +16,7 @@ SRC_URI = "${SOURCEFORGE_MIRROR}/fuse/fuse-${PV}.tar.gz \
            file://gold-unversioned-symbol.patch \
            file://aarch64.patch \
            file://0001-fuse-fix-the-return-value-of-help-option.patch \
+           file://0001-libfuse-fix-exec-environment-for-mount-and-umount.patch \
            file://fuse.conf \
 "
 SRC_URI[md5sum] = "33cae22ca50311446400daf8a6255c6a"

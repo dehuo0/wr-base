@@ -1,0 +1,86 @@
+From 0516ee45ece94379764c4f57b07fd4fde09a123f Mon Sep 17 00:00:00 2001
+From: Miklos Szeredi <mszeredi@suse.cz>
+Date: Fri, 22 May 2015 10:58:43 +0200
+Subject: [PATCH] libfuse: fix exec environment for mount and umount
+
+Found by Tavis Ormandy (CVE-2015-3202).
+
+Upstream-Status: Backport
+
+Signed-off-by: Yue Tao <yue.tao@windriver.com>
+
+---
+ ChangeLog        |    5 +++++
+ lib/mount_util.c |   23 +++++++++++++++++------
+ 2 files changed, 22 insertions(+), 6 deletions(-)
+
+diff --git a/ChangeLog b/ChangeLog
+index 2792493..0cd0cdd 100644
+--- a/ChangeLog
++++ b/ChangeLog
+@@ -1,3 +1,8 @@
++2015-05-22  Miklos Szeredi <miklos@szeredi.hu>
++
++	* libfuse: fix exec environment for mount and umount.  Found by
++	Tavis Ormandy (CVE-2015-3202).
++
+ 2013-07-01  Miklos Szeredi <miklos@szeredi.hu>
+ 
+ 	* Released 2.9.3
+diff --git a/lib/mount_util.c b/lib/mount_util.c
+index 3cad2e6..defb92f 100644
+--- a/lib/mount_util.c
++++ b/lib/mount_util.c
+@@ -96,10 +96,12 @@ static int add_mount(const char *progname, const char *fsname,
+ 		goto out_restore;
+ 	}
+ 	if (res == 0) {
++		char *env = NULL;
++
+ 		sigprocmask(SIG_SETMASK, &oldmask, NULL);
+ 		setuid(geteuid());
+-		execl("/bin/mount", "/bin/mount", "--no-canonicalize", "-i",
+-		      "-f", "-t", type, "-o", opts, fsname, mnt, NULL);
++		execle("/bin/mount", "/bin/mount", "--no-canonicalize", "-i",
++		       "-f", "-t", type, "-o", opts, fsname, mnt, NULL, &env);
+ 		fprintf(stderr, "%s: failed to execute /bin/mount: %s\n",
+ 			progname, strerror(errno));
+ 		exit(1);
+@@ -147,10 +149,17 @@ static int exec_umount(const char *progname, const char *rel_mnt, int lazy)
+ 		goto out_restore;
+ 	}
+ 	if (res == 0) {
++		char *env = NULL;
++
+ 		sigprocmask(SIG_SETMASK, &oldmask, NULL);
+ 		setuid(geteuid());
+-		execl("/bin/umount", "/bin/umount", "-i", rel_mnt,
+-		      lazy ? "-l" : NULL, NULL);
++		if (lazy) {
++			execle("/bin/umount", "/bin/umount", "-i", rel_mnt,
++			       "-l", NULL, &env);
++		} else {
++			execle("/bin/umount", "/bin/umount", "-i", rel_mnt,
++			       NULL, &env);
++		}
+ 		fprintf(stderr, "%s: failed to execute /bin/umount: %s\n",
+ 			progname, strerror(errno));
+ 		exit(1);
+@@ -206,10 +215,12 @@ static int remove_mount(const char *progname, const char *mnt)
+ 		goto out_restore;
+ 	}
+ 	if (res == 0) {
++		char *env = NULL;
++
+ 		sigprocmask(SIG_SETMASK, &oldmask, NULL);
+ 		setuid(geteuid());
+-		execl("/bin/umount", "/bin/umount", "--no-canonicalize", "-i",
+-		      "--fake", mnt, NULL);
++		execle("/bin/umount", "/bin/umount", "--no-canonicalize", "-i",
++		       "--fake", mnt, NULL, &env);
+ 		fprintf(stderr, "%s: failed to execute /bin/umount: %s\n",
+ 			progname, strerror(errno));
+ 		exit(1);
+-- 
+1.7.9.5
+
