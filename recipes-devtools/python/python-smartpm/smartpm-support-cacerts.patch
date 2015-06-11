@@ -1,0 +1,40 @@
+Fetcher.py: Add support for SSL keys.
+
+We want to be able to use public/private keys and a CA chain to
+identify ourselves to the server. This turns out to be reasonably easy.
+
+Signed-off-by: Peter Seebach <peter.seebach@windriver.com>
+
+diff --git a/doc/sysconf-index b/doc/sysconf-index
+index 916789e..0544ec6 100644
+--- a/doc/sysconf-index
++++ b/doc/sysconf-index
+@@ -18,3 +18,6 @@ max-active-downloads:
+ %s-proxy:
+ default-localmedia:
+ sorter-profile:
++pycurl-cacert: CA cert file for upstream if you're using SSL
++pycurl-pubkey: Public key file for SSL client authentication
++pycurl-privkey: Private key file for SSL client authentication
+diff --git a/smart/fetcher.py b/smart/fetcher.py
+index 343025f..34ef5fa 100644
+--- a/smart/fetcher.py
++++ b/smart/fetcher.py
+@@ -1729,6 +1729,17 @@ class PyCurlHandler(FetcherHandler):
+                         handle.setopt(pycurl.USERAGENT, "smart/" + VERSION)
+                         handle.setopt(pycurl.FAILONERROR, 1)
+ 
++                        # check for key-related settings
++                        pubkey = sysconf.get('pycurl-pubkey')
++                        cacert = sysconf.get('pycurl-cacert')
++                        privkey = sysconf.get('pycurl-privkey')
++                        if cacert:
++                            handle.setopt(pycurl.CAINFO, cacert)
++                        if pubkey:
++                            handle.setopt(pycurl.SSLCERT, pubkey)
++                        if privkey:
++                            handle.setopt(pycurl.SSLKEY, privkey)
++
+                         # check if we have a valid local file and use I-M-S
+                         if fetcher.validate(item, localpath):
+                             handle.setopt(pycurl.TIMECONDITION,

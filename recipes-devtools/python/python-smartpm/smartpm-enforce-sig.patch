@@ -1,0 +1,28 @@
+Fail to work with a channel if a fingerprint is not defined.
+
+Signed-off-by: Mark Hatle <mark.hatle@windriver.com>
+
+Index: smart-1.4.1/smart/channels/rpm_md.py
+===================================================================
+--- smart-1.4.1.orig/smart/channels/rpm_md.py
++++ smart-1.4.1/smart/channels/rpm_md.py
+@@ -66,6 +66,8 @@ class RPMMetaDataChannel(PackageChannel,
+         self._mirrorlist = mirrorlist
+         if fingerprint:
+             self._fingerprint = "".join(fingerprint.split())
++        else:
++            raise Error, _("Channel '%s' does not have a fingerprint defined") % self
+ 
+     def getCacheCompareURLs(self):
+         return [posixpath.join(self._baseurl, "repodata/repomd.xml")]
+@@ -203,7 +205,9 @@ class RPMMetaDataChannel(PackageChannel,
+             keypath = "/etc/rpm/keys/0x" + keyid
+             if not os.path.exists(keypath):
+                 raise Error, _("Channel '%s' signed with unknown key") % self
+-        
++        else:
++            raise Error, _("Channel '%s' does not have a fingerprint defined") % self
++
+         item = fetcher.enqueue(repomd)
+         if self._fingerprint:
+             gpgitem = fetcher.enqueue(reposig)
