@@ -13,7 +13,8 @@ LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=3b83ef96387f14655fc854ddc3c6bd57"
 
 SRC_URI = "${APACHE_MIRROR}/xerces/c/3/sources/${BP}.tar.gz \
-           file://fix-icu-include-dir.patch"
+           file://fix-icu-include-dir.patch \
+           file://xerces-CVE-2015-0252.patch "
 SRC_URI[md5sum] = "6a8ec45d83c8cfb1584c5a5345cb51ae"
 SRC_URI[sha256sum] = "a42785f71e0b91d5fd273831c87410ce60a73ccfdd207de1b805d26d44968736"
 
