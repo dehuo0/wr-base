@@ -1,0 +1,25 @@
+Subject: ltp: update testcases waiting time
+
+update ksm testcases waiting time to 20 seconds instead of 10s.
+
+Signed-off-by: Zhixiong Chi <zhixiong.chi@windriver.com>
+--- a/testcases/kernel/mem/lib/mem.c	2015-07-13 10:41:38.589569972 +0800
++++ b/testcases/kernel/mem/lib/mem.c	2015-07-13 10:42:03.883570562 +0800
+@@ -176,7 +176,7 @@
+ 	int changing = 1, count = 0;
+ 
+ 	while (changing) {
+-		sleep(10);
++		sleep(20);
+ 		count++;
+ 
+ 		SAFE_FILE_SCANF(cleanup, PATH_KSM "pages_shared",
+@@ -205,7 +205,7 @@
+ 	}
+ 
+ 	tst_resm(TINFO, "ksm daemon takes %ds to scan all mergeable pages",
+-		 count * 10);
++		 count * 20);
+ }
+ 
+ static void group_check(int run, int pages_shared, int pages_sharing,

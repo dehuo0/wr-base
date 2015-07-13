@@ -21,6 +21,7 @@ SRC_URI += " file://README \
              file://0015-Correct-the-usage-of-union-argument-in-semctl.patch \
              file://0016-Fix-invalid-argument-error-for-POSIX-test-case-pi_test.patch \
              file://0017-Change-some-auto-detecting-options-to-configurable-o.patch \
+             file://0018-ltp-update-testcases-waiting-time.patch \
             "
 
 do_compile(){
