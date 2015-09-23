@@ -17,36 +17,52 @@ python __anonymous () {
     if not newsrc:
         return
 
-    srcuri = d.getVar('SRC_URI', True)
-    scheme, network, path, user, passwd, param = bb.fetch.decodeurl(srcuri)
+    alluri = d.getVar('SRC_URI', True)
+    newuri = ""
+    for srcuri in alluri.split():
+        scheme, network, path, user, passwd, param = bb.fetch.decodeurl(srcuri)
 
 
-    # Drop hard-coded protocol from param if it exists (like protocol=file)
-    if "protocol" in param and param["protocol"] == "file":
+        # If there is no network defined, check all FILESPATH for the existence
+        # of PATH.  If the PATH is found, add it to newuri.
         if not network:
             if os.path.exists(path):
-                # If the path exists and we're not fetching over the network,
-                # use the local copy.
-                return
-            else:
-                del param["protocol"]
+                    newuri += srcuri + " "
+                    continue
+            added = 0
+            for directory in d.getVar('FILESPATH', True).split(':'):
+                if os.path.exists(directory + "/" + path):
+                    # If the path exists and we're not fetching over the network,
+                    # use the local copy.
+                    newuri += srcuri + " "
+                    added = 1
+                    break
+            if added:
+                continue
 
-    # Remove everything but the last directory name from the path
-    dirs = path.split("/")
-    repo = "/" + dirs[-1]
+        # Drop hard-coded protocol from param if it exists (like protocol=file)
+        if "protocol" in param and param["protocol"] == "file":
+            del param["protocol"]
 
-    if (repo.endswith(".git")):
-       repo = repo[:-4]
+        # Remove everything but the last directory name from the path
+        dirs = path.split("/")
+        repo = "/" + dirs[-1]
 
-    scheme, network, path, user, passwd, newparam = bb.fetch.decodeurl(newsrc)
-    path += repo
+        if (repo.endswith(".git")):
+           repo = repo[:-4]
 
-    # Copy or overwrite any params with the new param values.
-    for part in newparam:
-        param[part] = newparam[part]
+        scheme, network, path, user, passwd, newparam = bb.fetch.decodeurl(newsrc)
+        path += repo
 
-    result = bb.fetch.encodeurl([scheme, network, path, user, passwd, param])
-    bb.debug(2, "Changed %s to %s for package %s" % (srcuri, result, pkgname))
-    d.setVar("SRC_URI", result);
+        # Copy or overwrite any params with the new param values.
+        for part in newparam:
+            param[part] = newparam[part]
+
+        result = bb.fetch.encodeurl([scheme, network, path, user, passwd, param])
+        bb.debug(2, "Changed part of SRC_URI %s to %s for package %s" % (srcuri, result, pkgname))
+        newuri += result + " "
+
+    d.setVar("SRC_URI", newuri)
+    bb.debug(2, "Changed SRC_URI %s to %s for package %s" % (alluri, newuri, pkgname))
 }
 
