@@ -9,7 +9,9 @@ PV = "036"
 
 # v036 tag
 SRCREV = "d50a99c5ceeb7107f624c5d3238d37509b2217a8"
-SRC_URI = "git://git.kernel.org/pub/scm/boot/dracut/dracut.git"
+SRC_URI = "git://git.kernel.org/pub/scm/boot/dracut/dracut.git \
+           file://dracut-fix-files-directory-error.patch \
+          "
 
 S = "${WORKDIR}/git"
 
@@ -38,7 +40,7 @@ FILES_${PN} += "${datadir}/bash-completion \
 
 FILES_${PN}-dbg += "${prefix}/lib/dracut/.debug"
 
-RDEPENDS_${PN} = "findutils cpio util-linux-blkid bash ldd"
+RDEPENDS_${PN} = "findutils cpio util-linux-blkid util-linux-partx bash ldd"
 
 PACKAGECONFIG ??= "${@base_contains('DISTRO_FEATURES', 'systemd', 'systemd', '', d)}"
 PACKAGECONFIG[systemd] = "--with-systemdsystemunitdir=${systemd_unitdir}/system/,,,systemd"
