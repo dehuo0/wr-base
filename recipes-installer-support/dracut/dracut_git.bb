@@ -13,9 +13,11 @@ SRC_URI = "git://git.kernel.org/pub/scm/boot/dracut/dracut.git"
 
 S = "${WORKDIR}/git"
 
+EXTRA_OEMAKE += 'libdir=${prefix}/lib'
+
 do_configure() {
     ./configure --prefix=${prefix} \
-                --libdir=${libdir} \
+                --libdir=${prefix}/lib \
                 --datadir=${datadir} \
                 --sysconfdir=${sysconfdir} \
                 --sbindir=${sbindir} \
@@ -30,9 +32,11 @@ do_install() {
 }
 
 FILES_${PN} += "${datadir}/bash-completion \ 
-                ${libdir}/kernel \
                 ${prefix}/lib/kernel \
+                ${prefix}/lib/dracut \
                "
+
+FILES_${PN}-dbg += "${prefix}/lib/dracut/.debug"
 
 RDEPENDS_${PN} = "findutils cpio util-linux-blkid bash ldd"
 
