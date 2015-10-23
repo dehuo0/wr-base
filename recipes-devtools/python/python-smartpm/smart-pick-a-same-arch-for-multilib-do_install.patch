@@ -1,0 +1,49 @@
+From be9890e33a48804e8f6d8808bda6aad85d4b7aae Mon Sep 17 00:00:00 2001
+From: Song.Li <Song.Li@windriver.com>
+Date: Thu, 14 Mar 2013 10:58:03 +0800
+Subject: [PATCH] smart:pick a same arch for multilib do_install
+
+smartpm doesn't support multilib in this version.
+A multilib build will cause every package to have two providers.
+This will cause smartpm to waste a lot of time to decide
+which one to install.For qt4-x11-free-dbg, this will
+cause smartpm hung up, because qt4-x11-free-dbg have
+many required packages and these packages are recommended
+to each other.The required packages should be same
+arch as the package to be installed, so we should filter
+wrong arch out.
+
+Signed-off-by: Song.Li <Song.Li@windriver.com>
+---
+ smart/transaction.py |   15 +++++++++++++++
+ 1 files changed, 15 insertions(+), 0 deletions(-)
+
+diff --git a/smart/transaction.py b/smart/transaction.py
+index 300b9cc..26ccc50 100644
+--- a/smart/transaction.py
++++ b/smart/transaction.py
+@@ -603,6 +603,21 @@ class Transaction(object):
+                     # It's only a recommend, skip
+                     continue
+ 
++            #choose same arch for multilib to install
++            prvpkgkeys = prvpkgs.keys()
++            if len(prvpkgs) == 2 and prvpkgkeys[0].name == prvpkgkeys[1].name:
++                from smart.backends.rpm.rpmver import splitarch
++                prvpkgver0,prvpkgarch0 = splitarch(prvpkgkeys[0].version)
++                prvpkgver1,prvpkgarch1 = splitarch(prvpkgkeys[1].version)
++                pkgver,pkgarch = splitarch(pkg.version)
++
++                #If it's multilib, choose the same arch to install
++                if prvpkgver0 == prvpkgver1:
++                    if pkgarch == prvpkgarch0:
++                        prvpkgs = {prvpkgkeys[0]:True}
++                    elif pkgarch == prvpkgarch1:
++                        prvpkgs = {prvpkgkeys[1]:True}
++
+             if len(prvpkgs) == 1:
+                 # Don't check locked here. prvpkgs was
+                 # already filtered above.
+-- 
+1.7.1
+

@@ -1,0 +1,43 @@
+Subject: gdb: fix to use correct variable in elf32-arm.c
+
+Fix to use correct variable to fix the compilation error about
+abfd undefined.
+
+In addition, gdb has also fixed this problem in newer version.
+
+Signed-off-by: Chen Qi <Qi.Chen@windriver.com>
+---
+ gdb-7.3.1.patch |   20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/gdb-7.3.1.patch b/gdb-7.3.1.patch
+index d769e08..e79e853 100644
+--- a/gdb-7.3.1.patch
++++ b/gdb-7.3.1.patch
+@@ -1914,3 +1914,23 @@ index a1ef1c1..b05ed86 100644
+  typedef enum bfd_error
+  {
+    bfd_error_no_error = 0,
++--- gdb-7.3.1/bfd/elf32-arm.c
+++++ gdb-7.3.1/bfd/elf32-arm.c
++@@ -3132,7 +3132,7 @@ create_ifunc_sections (struct bfd_link_info *info)
++       s = bfd_make_section_with_flags (dynobj, ".iplt",
++ 				       flags | SEC_READONLY | SEC_CODE);
++       if (s == NULL
++-	  || !bfd_set_section_alignment (abfd, s, bed->plt_alignment))
+++	  || !bfd_set_section_alignment (dynobj, s, bed->plt_alignment))
++ 	return FALSE;
++       htab->root.iplt = s;
++     }
++@@ -3142,7 +3142,7 @@ create_ifunc_sections (struct bfd_link_info *info)
++       s = bfd_make_section_with_flags (dynobj, RELOC_SECTION (htab, ".iplt"),
++ 				       flags | SEC_READONLY);
++       if (s == NULL
++-	  || !bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
+++	  || !bfd_set_section_alignment (dynobj, s, bed->s->log_file_align))
++ 	return FALSE;
++       htab->root.irelplt = s;
++     }
+-- 
+1.7.9.5
+

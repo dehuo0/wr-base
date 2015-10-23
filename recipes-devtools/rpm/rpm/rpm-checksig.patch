@@ -1,0 +1,86 @@
+Cause a failure if a package only has an internal signature or 
+has an unknown signature.  Internal signatures are considered to
+be "NOTTRUSTED".
+
+Signed-off-by: Mark Hatle <mark.hatle@windriver.com>
+
+Index: rpm-5.4.14/rpmdb/pkgio.c
+===================================================================
+--- rpm-5.4.14.orig/rpmdb/pkgio.c
++++ rpm-5.4.14/rpmdb/pkgio.c
+@@ -208,8 +208,20 @@ fprintf(stderr, "*** free pkt %p[%d] id
+ 
+     /* Has this pubkey failled a previous lookup? */
+     if (hkp->pkt == NULL && awol != NULL
+-     && rpmbfChk(awol, sigp->signid, sizeof(sigp->signid)))
++     && rpmbfChk(awol, sigp->signid, sizeof(sigp->signid))) {
++#ifdef MANDATORY_KNOWN_SIG
++	/* If it's a 'bad' sig, check if it's an autosign package pubkey (if present). */
++	if (dig->pub && dig->publen > 0) {
++	    uint8_t keyid[8];
++
++	    xx = pgpPubkeyFingerprint((const rpmuint8_t *)dig->pub, dig->publen, keyid);
++	    if (!memcmp(sigp->signid, keyid, sizeof(keyid))) {
++		res = RPMRC_NOTTRUSTED;
++	    }
++	}
++#endif
+ 	goto leave;
++    }
+ 
+     /* Try keyutils keyring lookup. */
+     if (hkp->pkt == NULL) {
+@@ -366,7 +378,11 @@ hkp->npkts = 0;
+ 	    break;
+ 	case RPMRC_NOKEY:
+ 	    if (validate < 0)	/* XXX ignore NOKEY w rpmdb pubkey. */
++#ifdef MANDATORY_KNOWN_SIG
++		rc = RPMRC_NOTTRUSTED;
++#else
+ 		break;
++#endif
+ 	    /*@fallthrough@*/
+ 	case RPMRC_NOTFOUND:
+ 	case RPMRC_FAIL:	/* XXX remap to NOTFOUND? */
+Index: rpm-5.4.14/rpmdb/package.c
+===================================================================
+--- rpm-5.4.14.orig/rpmdb/package.c
++++ rpm-5.4.14/rpmdb/package.c
+@@ -360,12 +360,18 @@ assert(0);
+     case RPMRC_NOTTRUSTED:	/* Signature is OK, but key is not trusted. */
+     case RPMRC_NOKEY:		/* Public key is unavailable. */
+ #ifndef	DYING
++#ifdef MANDATORY_KNOWN_SIG
++ #define MANDATORY_MSG RPMLOG_ERR
++#else
++ #define MANDATORY_MSG RPMLOG_WARNING
++#endif
+ 	/* XXX Print NOKEY/NOTTRUSTED warning only once. */
+-    {	int lvl = (pgpStashKeyid(dig) ? RPMLOG_DEBUG : RPMLOG_WARNING);
++    {	int lvl = (pgpStashKeyid(dig) ? RPMLOG_DEBUG : MANDATORY_MSG);
+ 	rpmlog(lvl, "%s: %s\n", fn, buf);
+     }	break;
++    case RPMRC_NOSIG:		/* Signature is unavailable. */
+     case RPMRC_NOTFOUND:	/* Signature is unknown type. */
+-	rpmlog(RPMLOG_WARNING, "%s: %s\n", fn, buf);
++	rpmlog(MANDATORY_MSG, "%s: %s\n", fn, buf);
+ 	break;
+ #else
+     case RPMRC_NOTFOUND:	/* Signature is unknown type. */
+Index: rpm-5.4.14/lib/rpmgi.c
+===================================================================
+--- rpm-5.4.14.orig/lib/rpmgi.c
++++ rpm-5.4.14/lib/rpmgi.c
+@@ -176,6 +176,12 @@ Header rpmgiReadHeader(rpmgi gi, const c
+ 	case RPMRC_NOSIG:		/* XXX FIXME */
+ 	case RPMRC_NOTTRUSTED:
+ 	case RPMRC_NOKEY:
++#ifdef MANDATORY_KNOWN_SIG
++	    (void)headerFree(h);
++	    h = NULL;
++	    gi->rc = rpmrc;
++	    break;
++#endif
+ 	case RPMRC_OK:
+ 	    break;
+ 	}

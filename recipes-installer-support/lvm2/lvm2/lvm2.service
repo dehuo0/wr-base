@@ -1,0 +1,13 @@
+[Unit]
+Description=LVM activation
+DefaultDependencies=no
+Before=local-fs.target
+
+[Service]
+ExecStart=/usr/sbin/vgchange -ay --sysinit
+Type=oneshot
+TimeoutSec=0
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sysinit.target

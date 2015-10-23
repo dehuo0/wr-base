@@ -1,0 +1,20 @@
+commit 596e52455d34651c83226852cc83c19714a7cf45
+Author: Aws Ismail <aws.ismail@windriver.com>
+Date:   Fri Jul 20 14:55:57 2012 -0400
+
+Disable removing configure cache when cleaning
+    
+This patch was migrated from WRL4.3
+    
+Signed-off-by: Aws Ismail <aws.ismail@windriver.com>
+
+diff --git a/Makefile.in b/Makefile.in
+index 2db0044..71b8575 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -66,5 +66,3 @@ dist: clean
+ 
+ clean:
+ 	rm -f *~ .*~ *.o scsidev
+-	/bin/rm -f config.status config.log config.cache config.h
+-

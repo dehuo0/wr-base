@@ -1,0 +1,40 @@
+---
+ term-utils/script.c | 14 +++++++++-----
+ 1 file changed, 9 insertions(+), 5 deletions(-)
+
+diff --git a/term-utils/script.c b/term-utils/script.c
+index 02ba596..62ca76d 100644
+--- a/term-utils/script.c
++++ b/term-utils/script.c
+@@ -401,11 +401,11 @@ finish(int wait) {
+ 	int errsv = errno;
+ 	int options = wait ? 0 : WNOHANG;
+ 
+-	while ((pid = wait3(&status, options, 0)) > 0)
+-		if (pid == child) {
+-			childstatus = status;
++	while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
++		if (pid == child)
+ 			die = 1;
+-		}
++		childstatus = status;
++	}
+ 
+ 	errno = errsv;
+ }
+@@ -621,7 +621,11 @@ done(void) {
+ 		else
+ 			exit(WEXITSTATUS(childstatus));
+ 	}
+-	exit(EXIT_SUCCESS);
++
++	if (childstatus < 256 && childstatus > 0)
++		exit(childstatus);
++
++	exit(childstatus>>8);
+ }
+ 
+ void
+-- 
+1.9.1
+

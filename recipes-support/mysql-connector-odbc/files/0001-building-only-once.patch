@@ -1,0 +1,68 @@
+[PATCH] building only once
+
+Upstream-Status: Pending
+
+This block codes in while loop will make generateinifiles.cmake built
+many time, but everythings are same for each time, and introduce the
+conflict of writing files parallel.
+
+fix it by remove while loop, only building once.
+
+Signed-off-by: Roy.Li <rongqing.li@windriver.com>
+---
+ driver/CMakeLists.txt | 41 +++++++++++++++++++----------------------
+ 1 file changed, 19 insertions(+), 22 deletions(-)
+
+diff --git a/driver/CMakeLists.txt b/driver/CMakeLists.txt
+index 2427762..cca71bd 100644
+--- a/driver/CMakeLists.txt
++++ b/driver/CMakeLists.txt
+@@ -120,26 +120,23 @@ ENDWHILE(${DRIVER_INDEX} LESS ${DRIVERS_COUNT})
+ 
+ SET(DRIVER_INDEX 0)
+ 
+-WHILE(${DRIVER_INDEX} LESS ${DRIVERS_COUNT})
+-
+-  LIST(GET CONNECTOR_DRIVER_TYPES_SHORT ${DRIVER_INDEX} CONNECTOR_DRIVER_TYPE_SHORT)
+-  SET(DRIVER_NAME "myodbc5${CONNECTOR_DRIVER_TYPE_SHORT}")
+ 
+-  ADD_CUSTOM_COMMAND(TARGET ${DRIVER_NAME} POST_BUILD
+-                   COMMAND ${CMAKE_COMMAND}
+-            -DDRIVER_LOCATION1="${DRIVER_LOCATION1}"
+-            -DDRIVER_LOCATION2="${DRIVER_LOCATION2}"
+-            -DBINARY_DIR=${CMAKE_BINARY_DIR}/test
+-            -DCONNECTOR_MAJOR=${CONNECTOR_MAJOR}
+-            -DCONNECTOR_MINOR=${CONNECTOR_MINOR}
+-            -DCONNECTOR_DRIVER_TYPE_SHORT1=${CONNECTOR_DRIVER_TYPE_SHORT1}
+-            -DCONNECTOR_DRIVER_TYPE_SHORT2=${CONNECTOR_DRIVER_TYPE_SHORT2}
+-            -DCONNECTOR_DRIVER_TYPE1=${CONNECTOR_DRIVER_TYPE1}
+-            -DCONNECTOR_DRIVER_TYPE2=${CONNECTOR_DRIVER_TYPE2}
+-            -DDRIVERS_COUNT=${DRIVERS_COUNT}
+-            -P ${CMAKE_SOURCE_DIR}/test/cmake/generateinifiles.cmake
+-                  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/test")
+-
+-  MATH(EXPR DRIVER_INDEX "${DRIVER_INDEX} + 1")
+-
+-ENDWHILE(${DRIVER_INDEX} LESS ${DRIVERS_COUNT})
++LIST(GET CONNECTOR_DRIVER_TYPES_SHORT ${DRIVER_INDEX} CONNECTOR_DRIVER_TYPE_SHORT)
++SET(DRIVER_NAME "myodbc5${CONNECTOR_DRIVER_TYPE_SHORT}")
++
++ADD_CUSTOM_COMMAND(TARGET ${DRIVER_NAME} POST_BUILD
++                 COMMAND ${CMAKE_COMMAND}
++          -DDRIVER_LOCATION1="${DRIVER_LOCATION1}"
++          -DDRIVER_LOCATION2="${DRIVER_LOCATION2}"
++          -DBINARY_DIR=${CMAKE_BINARY_DIR}/test
++          -DCONNECTOR_MAJOR=${CONNECTOR_MAJOR}
++          -DCONNECTOR_MINOR=${CONNECTOR_MINOR}
++          -DCONNECTOR_DRIVER_TYPE_SHORT1=${CONNECTOR_DRIVER_TYPE_SHORT1}
++          -DCONNECTOR_DRIVER_TYPE_SHORT2=${CONNECTOR_DRIVER_TYPE_SHORT2}
++          -DCONNECTOR_DRIVER_TYPE1=${CONNECTOR_DRIVER_TYPE1}
++          -DCONNECTOR_DRIVER_TYPE2=${CONNECTOR_DRIVER_TYPE2}
++          -DDRIVERS_COUNT=${DRIVERS_COUNT}
++          -P ${CMAKE_SOURCE_DIR}/test/cmake/generateinifiles.cmake
++                WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/test")
++
++MATH(EXPR DRIVER_INDEX "${DRIVER_INDEX} + 1")
+-- 
+1.9.1
+

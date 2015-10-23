@@ -1,0 +1,96 @@
+Fix global variable instantiation problems
+
+This patch was migrated from WRL4.3
+
+Upstream-Status: Inappropriate [embedded specific]
+
+Signed-off-by: Aws Ismail <aws.ismail@windriver.com>
+
+diff --git a/libmultipath/config.c b/libmultipath/config.c
+index 8d7d3d2..fd0e867 100644
+--- a/libmultipath/config.c
++++ b/libmultipath/config.c
+@@ -23,6 +23,8 @@
+ #include "devmapper.h"
+ #include "version.h"
+ 
++struct config * conf;
++
+ static int
+ hwe_strmatch (struct hwentry *hwe1, struct hwentry *hwe2)
+ {
+diff --git a/libmultipath/config.h b/libmultipath/config.h
+index 9cc143a..901fdf0 100644
+--- a/libmultipath/config.h
++++ b/libmultipath/config.h
+@@ -138,7 +138,7 @@ struct config {
+ 	vector elist_device;
+ };
+ 
+-struct config * conf;
++extern struct config * conf;
+ 
+ struct hwentry * find_hwe (vector hwtable, char * vendor, char * product, char *revision);
+ struct mpentry * find_mpe (char * wwid);
+diff --git a/libmultipath/log_pthread.c b/libmultipath/log_pthread.c
+index d701ba1..5ced4c0 100644
+--- a/libmultipath/log_pthread.c
++++ b/libmultipath/log_pthread.c
+@@ -13,6 +13,11 @@
+ #include "log.h"
+ #include "lock.h"
+ 
++pthread_t log_thr;
++pthread_mutex_t *logq_lock;
++pthread_mutex_t *logev_lock;
++pthread_cond_t *logev_cond;
++
+ void log_safe (int prio, const char * fmt, va_list ap)
+ {
+ 	sigset_t old;
+diff --git a/libmultipath/log_pthread.h b/libmultipath/log_pthread.h
+index 77780d8..955ba73 100644
+--- a/libmultipath/log_pthread.h
++++ b/libmultipath/log_pthread.h
+@@ -3,11 +3,11 @@
+ 
+ #include <pthread.h>
+ 
+-pthread_t log_thr;
++extern pthread_t log_thr;
+ 
+-pthread_mutex_t *logq_lock;
+-pthread_mutex_t *logev_lock;
+-pthread_cond_t *logev_cond;
++extern pthread_mutex_t *logq_lock;
++extern pthread_mutex_t *logev_lock;
++extern pthread_cond_t *logev_cond;
+ 
+ void log_safe(int prio, const char * fmt, va_list ap);
+ void log_thread_start(pthread_attr_t *attr);
+diff --git a/libmultipath/parser.c b/libmultipath/parser.c
+index 79c2d22..68314e1 100644
+--- a/libmultipath/parser.c
++++ b/libmultipath/parser.c
+@@ -23,6 +23,8 @@
+ #include "memory.h"
+ #include "debug.h"
+ 
++FILE *stream;
++
+ /* local vars */
+ static int sublevel = 0;
+ static vector keywords = NULL;
+diff --git a/libmultipath/parser.h b/libmultipath/parser.h
+index 8bf1c76..98535bd 100644
+--- a/libmultipath/parser.h
++++ b/libmultipath/parser.h
+@@ -48,7 +48,7 @@ struct keyword {
+ };
+ 
+ /* global var exported */
+-FILE *stream;
++extern FILE *stream;
+ 
+ /* Reloading helpers */
+ #define SET_RELOAD      (reload = 1)

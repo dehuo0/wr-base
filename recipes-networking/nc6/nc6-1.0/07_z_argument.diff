@@ -1,0 +1,132 @@
+Add -z arugment like other netcat alternatives
+
+Upstream-Status: Pending [Debian patch] 
+
+--- a/docs/nc6.1.in
++++ b/docs/nc6.1.in
+@@ -187,6 +187,9 @@
+ opposite direction to normal transfer.  If listen mode is specified, this is
+ equivalent to "\-\-send-only \-\-buffer-size=65536" otherwise it is equivalent to
+ "\-\-recv-only \-\-buffer-size=65536".
++.TP 13
++.I \-z
++Don't send any data (scanning mode).
+ .SH UDP
+ UDP support in netcat6 works very well in both connect and in listen mode.
+ When using UDP in listen mode netcat6 accepts UDP packets from any source that
+--- a/src/parser.c
++++ b/src/parser.c
+@@ -149,6 +149,7 @@
+ 	int buffer_size = 0;
+ 	int sndbuf_size = 0;
+ 	int rcvbuf_size = 0;
++	bool zflag = false;
+ 
+ 	/* check arguments */
+ 	assert(argc > 0);
+@@ -164,7 +165,7 @@
+ 	_verbosity_level = 0;
+ 
+ 	/* option recognition loop */
+-	while ((c = getopt_long(argc, argv, "46be:T:hlnp:q:s:uvw:xXCt:",
++	while ((c = getopt_long(argc, argv, "46be:T:hlnp:q:s:uvw:xXCt:z",
+ 	                        long_options, &option_index)) >= 0)
+ 	{
+  		switch (c) {
+@@ -316,6 +317,9 @@
+ 			if (ttl < -1 || ttl > 255 )
+ 				fatal(_("ttl can only be set between 0 to 255"));
+ 			break;
++		case 'z':
++			zflag = true;
++			break;
+ 		case '?':
+ 			print_usage(stderr);
+ 			exit(EXIT_FAILURE);
+@@ -404,6 +408,11 @@
+ 		fatal_internal("invalid protocol family %d", family);
+ 	}
+ 
++	/* don't set -l and -z both */
++	if (listen_mode == true && zflag == true) {
++		fatal(_("cannot set both -l and -z"));
++	}
++
+ 	/* set mode flags */
+ 	if (listen_mode == true) {
+ 		ca_set_flag(attrs, CA_LISTEN_MODE);
+@@ -545,6 +554,9 @@
+ 		ca_set_sndbuf_size(attrs, sndbuf_size);
+ 	if (rcvbuf_size > 0)
+ 		ca_set_rcvbuf_size(attrs, rcvbuf_size);
++
++	/* setup zflag */
++	ca_set_zflag(attrs, zflag);
+ }
+ 
+ 
+@@ -640,6 +652,7 @@
+ 	fprintf(fp, " -X, --rev-transfer     %s\n",
+ 	              _("File transfer mode (reverse direction)"));
+ 	fprintf(fp, " -T, --ttl=TTL          %s\n", _("TTL of outgoing IP packet"));
++	fprintf(fp, " -z                     %s\n", _("Don't send any data (scan mode)"));
+ 	fprintf(fp, "\n");
+ }
+ 
+--- a/src/connection.h
++++ b/src/connection.h
+@@ -70,6 +70,7 @@
+ 	bool remote_half_close_suppress;
+ 	bool local_half_close_suppress;
+ 	char *local_exec;
++	bool zflag;
+ } connection_attributes_t;
+ 
+ /* CA flags */
+@@ -136,6 +137,9 @@
+ #define ca_set_local_hold_timeout(CA, T)		\
+ 	((CA)->local_hold_timeout = (T))
+ 
++#define ca_zflag(CA)			((CA)->zflag)
++#define ca_set_zflag(CA, Z) 		((CA)->zflag = (Z))
++
+ #define ca_remote_half_close_suppress(CA)		\
+ 	((CA)->remote_half_close_suppress)
+ #define ca_set_remote_half_close_suppress(CA, B)	\
+--- a/src/main.c
++++ b/src/main.c
+@@ -174,7 +174,7 @@
+ {
+ 	circ_buf_t remote_buffer, local_buffer;
+ 	io_stream_t remote_stream, local_stream;
+-	int retval;
++	int retval=0;
+ 
+ 	assert(attrs != NULL);
+ 	assert(fd >= 0);
+@@ -219,14 +219,17 @@
+ 			     remote_stream.mtu);
+ 	}
+ 
+-	/* transfer data between endpoints */
+-	retval = run_transfer(attrs, &remote_stream, &local_stream);
+-
+-	/* cleanup */
+-	io_stream_destroy(&local_stream);
+-	io_stream_destroy(&remote_stream);
+-	cb_destroy(&local_buffer);
+-	cb_destroy(&remote_buffer);
++	/* if not in scan mode, send data */
++	if (attrs->zflag == false) {
++		/* transfer data between endpoints */
++		retval = run_transfer(attrs, &remote_stream, &local_stream);
++
++		/* cleanup */
++		io_stream_destroy(&local_stream);
++		io_stream_destroy(&remote_stream);
++		cb_destroy(&local_buffer);
++		cb_destroy(&remote_buffer);
++	}
+ 
+ 	return retval;
+ }

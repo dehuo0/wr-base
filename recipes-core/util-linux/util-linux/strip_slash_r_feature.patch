@@ -1,0 +1,57 @@
+---
+ term-utils/script.c | 18 +++++++++++++++++-
+ 1 file changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/term-utils/script.c b/term-utils/script.c
+index 62ca76d..864b90c 100644
+--- a/term-utils/script.c
++++ b/term-utils/script.c
+@@ -115,6 +115,7 @@ int	eflg = 0;
+ int	fflg = 0;
+ int	qflg = 0;
+ int	tflg = 0;
++int	rflg = 0;
+ int	forceflg = 0;
+ int	isterm;
+ 
+@@ -196,7 +197,7 @@ main(int argc, char **argv) {
+ 	textdomain(PACKAGE);
+ 	atexit(close_stdout);
+ 
+-	while ((ch = getopt_long(argc, argv, "ac:efqt::Vh", longopts, NULL)) != -1)
++	while ((ch = getopt_long(argc, argv, "ac:efqrt::Vh", longopts, NULL)) != -1)
+ 		switch(ch) {
+ 		case 'a':
+ 			aflg = 1;
+@@ -228,6 +229,9 @@ main(int argc, char **argv) {
+ 		case 'h':
+ 			usage(stdout);
+ 			break;
++		case 'r':
++			rflg++;
++			break;
+ 		case '?':
+ 		default:
+ 			usage(stderr);
+@@ -489,6 +493,18 @@ dooutput(void) {
+ 			fprintf(timingfd, "%f %zd\n", newtime - oldtime, cc);
+ 			oldtime = newtime;
+ 		}
++		if (rflg) {
++			int newcc = 0;
++			int i;
++			for (i = 0; i < cc; i++)
++				if (obuf[i] != '\r') {
++					obuf[newcc] = obuf[i];
++					newcc++;
++				}
++			cc = newcc;
++			if (!cc)
++				continue;
++		}
+ 		if (fwrite_all(obuf, 1, cc, fscript)) {
+ 			warn (_("cannot write script file"));
+ 			fail();
+-- 
+1.9.1
+

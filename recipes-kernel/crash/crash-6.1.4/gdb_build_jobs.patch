@@ -1,0 +1,23 @@
+This enables parallel building (multiple jobs in gdb) by reading the
+value from GDB_MAKE_JOBS.
+
+Signed-off-by: Amy Fong <amy.fong@windriver.com>
+--
+ Makefile |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+Index: crash-6.1.0/Makefile
+===================================================================
+--- crash-6.1.0.orig/Makefile	2013-02-22 10:25:46.000000000 -0800
++++ crash-6.1.0/Makefile	2013-02-22 10:32:08.695774323 -0800
+@@ -227,8 +227,8 @@
+ 	@if [ ! -f ${GDB}/config.status ]; then \
+ 	  (cd ${GDB}; ./configure ${GDB_CONF_FLAGS} --with-separate-debug-dir=/usr/lib/debug \
+ 	    --with-bugurl="" --with-expat=no --with-python=no ${GDB_EXTRA_CONF_FLAGS}; \
+-	  make --no-print-directory CRASH_TARGET=${TARGET}; echo ${TARGET} > crash.target) \
+-	else (cd ${GDB}/gdb; make --no-print-directory CRASH_TARGET=${TARGET};); fi
++	  make --no-print-directory CRASH_TARGET=${TARGET} ${GDB_MAKE_JOBS}; echo ${TARGET} > crash.target) \
++	else (cd ${GDB}/gdb; make --no-print-directory CRASH_TARGET=${TARGET} ${GDB_MAKE_JOBS};); fi
+ 	@if [ ! -f ${GDB}/gdb/libgdb.a ]; then \
+ 	  echo; echo "gdb build failed: ${GDB}/gdb/libgdb.a does not exist"; \
+ 	  echo; exit 1; fi

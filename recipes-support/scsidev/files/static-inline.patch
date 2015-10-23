@@ -1,0 +1,56 @@
+scsidev: inline type needs to be static inline
+
+"inline" will not work correctly for -O0 optimization
+with gcc5.
+
+Upstream-Status: Inappropriate [no upstream]
+
+Signed-off-by: Joe Slater <jslater@windriver.com>
+
+
+--- a/scsidev.c
++++ b/scsidev.c
+@@ -387,7 +387,7 @@ enum devtype_t inq_devtp_to_devtp (const
+ 	}
+ }
+ 
+-inline char isblk (enum devtype_t devtp)
++static inline char isblk (enum devtype_t devtp)
+ {
+ 	switch (devtp) {
+ 	    case SD:
+@@ -697,7 +697,7 @@ void oldscsiname (sname *spnt)
+ /*************************** PERMISSIONS ****************************/
+ 
+ /** Helper to copy perms */
+-inline void cp_perm (struct stat *to, const struct stat *from)
++static inline void cp_perm (struct stat *to, const struct stat *from)
+ {
+ 	to->st_uid  = from->st_uid;
+ 	to->st_gid  = from->st_gid;
+@@ -705,14 +705,14 @@ inline void cp_perm (struct stat *to, co
+ }
+ 
+ /** Helper to apply perms */
+-inline void apply_perm (const char* nm, const struct stat *st, int fmode)
++static inline void apply_perm (const char* nm, const struct stat *st, int fmode)
+ {
+ 	chown (nm, st->st_uid, st->st_gid);
+ 	chmod (nm, st->st_mode | fmode);
+ }
+ 
+ /** Helper to compare perms */
+-inline int cmp_perm (const struct stat *p1, const struct stat *p2)
++static inline int cmp_perm (const struct stat *p1, const struct stat *p2)
+ {
+ 	return (p1->st_uid  != p2->st_uid ||
+ 		p1->st_gid  != p2->st_gid ||
+@@ -1026,7 +1026,7 @@ void flush_sdev ()
+ 
+ 
+ /** Remove trailing whitespace */
+-int inline rmv_trail_ws (char* str)
++int static inline rmv_trail_ws (char* str)
+ {
+ 	int i = strlen (str);
+ 	int n = 0;

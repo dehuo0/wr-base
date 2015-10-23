@@ -1,0 +1,86 @@
+---
+ term-utils/script.c | 25 ++++++++++++++++++++++++-
+ 1 file changed, 24 insertions(+), 1 deletion(-)
+
+diff --git a/term-utils/script.c b/term-utils/script.c
+index 864b90c..d68f522 100644
+--- a/term-utils/script.c
++++ b/term-utils/script.c
+@@ -116,6 +116,7 @@ int	fflg = 0;
+ int	qflg = 0;
+ int	tflg = 0;
+ int	rflg = 0;
++int	iflg = 0;
+ int	forceflg = 0;
+ int	isterm;
+ 
+@@ -124,6 +125,9 @@ sigset_t block_mask, unblock_mask;
+ int die;
+ int resized;
+ 
++fd_set rds;
++fd_set master_rds;
++
+ static void
+ die_if_link(char *fn) {
+ 	struct stat s;
+@@ -197,7 +201,7 @@ main(int argc, char **argv) {
+ 	textdomain(PACKAGE);
+ 	atexit(close_stdout);
+ 
+-	while ((ch = getopt_long(argc, argv, "ac:efqrt::Vh", longopts, NULL)) != -1)
++	while ((ch = getopt_long(argc, argv, "ac:efiqrt::Vh", longopts, NULL)) != -1)
+ 		switch(ch) {
+ 		case 'a':
+ 			aflg = 1;
+@@ -208,6 +212,9 @@ main(int argc, char **argv) {
+ 		case 'e':
+ 			eflg = 1;
+ 			break;
++		case 'i':
++			iflg++;
++			break;
+ 		case 'f':
+ 			fflg = 1;
+ 			break;
+@@ -251,6 +258,14 @@ main(int argc, char **argv) {
+ 		fail();
+ 	}
+ 
++	if (iflg) {
++		sigemptyset(&sa.sa_mask);
++		sa.sa_flags = 0;
++
++		sa.sa_handler = SIG_IGN;
++		sigaction(SIGTTOU, &sa, NULL);
++	}
++
+ 	shell = getenv("SHELL");
+ 	if (shell == NULL)
+ 		shell = _PATH_BSHELL;
+@@ -319,6 +334,7 @@ doinput(void) {
+ 	int errsv = 0;
+ 	ssize_t cc = 0;
+ 	char ibuf[BUFSIZ];
++	int select_ret;
+ 	fd_set readfds;
+ 
+ 	/* close things irrelevant for this process */
+@@ -333,7 +349,14 @@ doinput(void) {
+ 	/* block SIGCHLD */
+ 	sigprocmask(SIG_SETMASK, &block_mask, &unblock_mask);
+ 
++	FD_ZERO(&master_rds);
++	FD_SET(0, &master_rds);
+ 	while (die == 0) {
++		memcpy(&rds, &master_rds, sizeof(master_rds));
++		select_ret = select(1, &rds, NULL, NULL, NULL);
++		if (select_ret < 0)
++			break;
++
+ 		FD_SET(STDIN_FILENO, &readfds);
+ 
+ 		errno = 0;
+-- 
+1.9.1
+

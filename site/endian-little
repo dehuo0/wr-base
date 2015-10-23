@@ -1,0 +1,5 @@
+# rp-pppoe
+rpppoe_cv_pack_bitfields=${rpppoe_cv_pack_bitfields=rev}
+
+#modphp
+ac_cv_c_bigendian_php=${ac_cv_c_bigendian_php=no}

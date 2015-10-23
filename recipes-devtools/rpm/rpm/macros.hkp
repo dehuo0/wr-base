@@ -1,0 +1,3 @@
+%_hkp_keyserver         file://
+%_hkp_keyserver_query   %{_hkp_keyserver}/etc/rpm/keys/
+

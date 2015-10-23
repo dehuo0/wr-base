@@ -1,0 +1,8 @@
+This template adds benchmark packages.
+
+To use, add
+
+--with-template=feature/benchmark
+
+as a configure option
+

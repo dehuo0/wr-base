@@ -1,0 +1,31 @@
+This patch turns off the output processing when the output
+device is not actually a terminal.
+
+Signed-off-by: Jason Wessel <jason.wessel@windriver.com>
+
+---
+ term-utils/script.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/term-utils/script.c b/term-utils/script.c
+index f22eeab..f16751a 100644
+--- a/term-utils/script.c
++++ b/term-utils/script.c
+@@ -1091,5 +1091,14 @@ getslave(void) {
+ 	}
+ #endif
+ 	setsid();
++	if (rflg) {
++		if (!isatty(1)) {
++			unsigned long oflag = tt.c_oflag;
++			tt.c_oflag &= ~OPOST;
++			(void) tcsetattr(slave, TCSANOW, &tt);
++			tt.c_oflag = oflag;
++			(void) tcsetattr(0, TCSADRAIN, &tt);
++		}
++	}
+ 	ioctl(slave, TIOCSCTTY, 0);
+ }
+-- 
+1.9.1
+

@@ -1,0 +1,11 @@
+[Unit]
+Description=CFEngine Server Daemon
+After=syslog.target
+
+[Service]
+ExecStart=@bindir@/cf-serverd
+Type=forking
+PIDFile=@localstatedir@/cfengine/cf-serverd.pid
+
+[Install]
+WantedBy=multi-user.target

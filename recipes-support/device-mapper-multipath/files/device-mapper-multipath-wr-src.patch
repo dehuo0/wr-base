@@ -1,0 +1,57 @@
+Device-mapper-multipath-wr-src
+
+This patch was migrated from WRL4.3
+
+Upstream-Status: Inappropriate [embedded specific]
+
+Signed-off-by: Aws Ismail <aws.ismail@windriver.com>
+
+diff --git a/Makefile.inc b/Makefile.inc
+index 24d4adf..30afef8 100644
+--- a/Makefile.inc
++++ b/Makefile.inc
+@@ -41,8 +41,9 @@ INSTALL_PROGRAM = install
+ ifndef RPM_OPT_FLAGS
+ 	RPM_OPT_FLAGS = -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions -fstack-protector --param=ssp-buffer-size=4
+ endif
+-
++ifeq ($(OPTFLAGS),)
+ OPTFLAGS     = $(RPM_OPT_FLAGS) -Wunused -Wstrict-prototypes
++endif
+ CFLAGS	     = $(OPTFLAGS) -fPIC -DLIB_STRING=\"${LIB}\"
+ SHARED_FLAGS = -shared
+ 
+diff --git a/kpartx/lopart.c b/kpartx/lopart.c
+index 79d8328..bbd9f1a 100644
+--- a/kpartx/lopart.c
++++ b/kpartx/lopart.c
+@@ -27,6 +27,7 @@
+ #include <sys/mman.h>
+ #include <sysmacros.h>
+ 
++#ifdef unneeded /* asm/posix_types.h defines __kernel_old_dev_t */
+ #if defined(__hppa__) || defined(__powerpc64__) || defined (__alpha__) \
+  || defined (__x86_64__)
+ typedef unsigned long __kernel_old_dev_t;
+@@ -35,6 +36,7 @@ typedef unsigned int __kernel_old_dev_t;
+ #else
+ typedef unsigned short __kernel_old_dev_t;
+ #endif
++#endif
+ 
+ #define dev_t __kernel_old_dev_t
+ 
+@@ -43,12 +45,7 @@ typedef unsigned short __kernel_old_dev_t;
+ #include "lopart.h"
+ #include "xstrncpy.h"
+ 
+-#if !defined (__alpha__) && !defined (__ia64__) && !defined (__x86_64__) \
+-        && !defined (__s390x__)
+-#define int2ptr(x)	((void *) ((int) x))
+-#else
+-#define int2ptr(x)	((void *) ((long) x))
+-#endif
++#define int2ptr(x)     ((void *)(intptr_t)(x))
+ 
+ static char *
+ xstrdup (const char *s)

@@ -1,0 +1,26 @@
+From dd3dfd447a4b07ee7e2b30fc0113ff4b87930b87 Mon Sep 17 00:00:00 2001
+From: Jackie Huang <jackie.huang@windriver.com>
+Date: Mon, 24 Sep 2012 15:47:15 +0800
+Subject: [PATCH] Fix the incorrect include path for acpixtract/Makefile.
+
+Signed-off-by: Jackie Huang <jackie.huang@windriver.com>
+---
+ acpixtract/Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/acpixtract/Makefile b/acpixtract/Makefile
+index d80aca1..de25ddb 100644
+--- a/acpixtract/Makefile
++++ b/acpixtract/Makefile
+@@ -1,7 +1,7 @@
+ PROG=	acpixtract
+ SRCS=	acpixtract.c
+ 
+-CFLAGS+= -Wall -O2 -D_LINUX -DACPI_APPLICATION -Wstrict-prototypes -I../../include 
++CFLAGS+= -Wall -O2 -D_LINUX -DACPI_APPLICATION -Wstrict-prototypes -I../include 
+ 
+ all: $(PROG)
+ 
+-- 
+1.7.4
+

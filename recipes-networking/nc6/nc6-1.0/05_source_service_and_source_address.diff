@@ -1,0 +1,16 @@
+Don't override ai_flags with hints.ai_flags
+
+Upstream-Status: Pending [Debian patch] 
+
+--- a/src/afindep.c
++++ b/src/afindep.c
+@@ -154,7 +154,8 @@
+ 			src_hints.ai_flags    = AI_PASSIVE;
+ 			src_hints.ai_socktype = ptr->ai_socktype;
+ 			src_hints.ai_protocol = ptr->ai_protocol;
+-			src_hints.ai_flags    = hints->ai_flags;
++			/* Don't override previous ai_flags */
++			src_hints.ai_flags    |= hints->ai_flags;
+ 
+ 			/* get the local IP address of the connection */
+ 			err = getaddrinfo(local_address, local_service,

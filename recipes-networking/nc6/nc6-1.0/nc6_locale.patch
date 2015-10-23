@@ -1,0 +1,21 @@
+Change the way we determine if locale.h is available
+
+Due to recently changes with the way gettext and glib-gettext list
+if we have LOCALE support or not, we need to change the ifdef to
+match.
+
+Signed-off-by: Mark Hatle <mark.hatle@windriver.com>
+
+Index: nc6-1.0/src/main.c
+===================================================================
+--- nc6-1.0.orig/src/main.c
++++ nc6-1.0/src/main.c
+@@ -35,7 +35,7 @@
+ #include <sys/types.h>
+ #include <sys/wait.h>
+ #include <assert.h>
+-#ifdef HAVE_LOCALE_H
++#ifdef HAVE_LC_MESSAGES
+ #include <locale.h>
+ #endif
+  

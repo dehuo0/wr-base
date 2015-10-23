@@ -1,0 +1,48 @@
+Check the fingerprint against a file in /etc/rpm/keys.  This matches
+the corresponding patch for rpm.  The name of the file is: 0x<16 byte id>
+
+Signed-off-by: Mark Hatle <mark.hatle@windriver.com>
+
+Index: smart-1.4.1/smart/channels/rpm_md.py
+===================================================================
+--- smart-1.4.1.orig/smart/channels/rpm_md.py
++++ smart-1.4.1/smart/channels/rpm_md.py
+@@ -196,6 +196,13 @@ class RPMMetaDataChannel(PackageChannel,
+                 oldinfo = self.loadMetadata(path)
+             except Error:
+                 pass
++
++        if self._fingerprint:
++            # Verify we have the key available, based on fingerprint
++            keyid = self._fingerprint[-16:].lower()
++            keypath = "/etc/rpm/keys/0x" + keyid
++            if not os.path.exists(keypath):
++                raise Error, _("Channel '%s' signed with unknown key") % self
+         
+         item = fetcher.enqueue(repomd)
+         if self._fingerprint:
+@@ -216,9 +223,22 @@ class RPMMetaDataChannel(PackageChannel,
+                       _("Download of repomd.xml.asc failed for secure "
+                         "channel '%s': %s") % (self, gpgitem.getFailedReason())
+ 
++            # Create temporary keychain
++            import tempfile
++            (tmpkeyfd, tmpkeyfile) = tempfile.mkstemp(suffix='.gpg', prefix='smart', dir=None, text=False)
++            os.close(tmpkeyfd)
++
+             status, output = commands.getstatusoutput(
+-                "gpg --batch --no-secmem-warning --status-fd 1 --verify "
+-                "%s %s" % (gpgitem.getTargetPath(), item.getTargetPath()))
++                "gpg2 --no-default-keyring --keyring %s "
++		"--batch --no-secmem-warning --status-fd 1 --import "
++                "%s" % (tmpkeyfile, keypath))
++
++            status, output = commands.getstatusoutput(
++                "gpg2 --no-default-keyring --keyring %s "
++                "--batch --no-secmem-warning --status-fd 1 --verify "
++                "%s %s" % (tmpkeyfile, gpgitem.getTargetPath(), item.getTargetPath()))
++
++            os.remove(tmpkeyfile)
+ 
+             badsig = False
+             goodsig = False

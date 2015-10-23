@@ -1,0 +1,233 @@
+Add CRLF support for common services
+
+Upstream-Status: Pending [Debian patch] 
+
+--- nc6-1.0.orig/configure.ac	2009-09-07 07:41:40.000000000 +0200
++++ nc6-1.0/configure.ac		2009-09-07 08:22:46.000000000 +0200
+@@ -161,6 +161,18 @@
+   LIBS="${INET6_LIBS} ${LIBS}"
+ fi
+ 
++# CRLF option
++crlfoption="yes"
++AC_ARG_ENABLE(crlfoption, AC_HELP_STRING([--disable-crlfoption],
++  [compile without crlfoption support]),
++  [ if test x$enable_crlfoption = xno; then crlfoption="no"; fi ],
++  [ crlfoption="yes" ]
++)
++
++if test $crlfoption = "yes"; then
++  AC_DEFINE([CRLFOPTION],1,[compile with CRLF option])
++fi
++
+ dnl Check for libraries
+ AC_CHECK_LIB(socket, socket)
+ 
+--- nc6-1.0.orig/docs/nc6.1.in	2009-09-07 07:41:40.000000000 +0200
++++ nc6-1.0/docs/nc6.1.in	2009-09-07 16:15:41.000000000 +0200
+@@ -170,6 +170,9 @@
+ .I \-w, --timeout=SECONDS
+ Timeout for network connects and accepts (see "TIMEOUTS").
+ .TP 13
++.I \-C
++Send CRLF as line-ending
++.TP 13
+ .I \-x, --transfer
+ File transfer mode (see "FILE TRANSFER").  If listen mode is
+ specified, this is equivalent to "--recv-only --buffer-size=65536" otherwise
+--- nc6-1.0.orig/src/circ_buf.c	2009-09-07 07:41:40.000000000 +0200
++++ nc6-1.0/src/circ_buf.c	2009-09-07 15:41:59.000000000 +0200
+@@ -382,6 +382,28 @@
+ 
+ 
+ 
++ssize_t cb_write_crlf(circ_buf_t *cb, int fd, size_t nbytes)
++{
++	circ_buf_t cb2;
++	ssize_t cb2ptr;
++	ssize_t rr;
++
++	cb_init(&cb2, (cb->data_size * 2));
++
++	for ( cb2ptr = 0; cb2ptr < cb->data_size; cb2ptr++, rr++ ) {
++		if ( cb->buf[cb2ptr] == '\n' ) /* LF? */
++			cb_append(&cb2, (const uint8_t *)"\r\n", 2); /* replace with CRLF */
++		else
++			cb_append(&cb2, &(cb->buf[cb2ptr]), 1);
++	}
++
++	cb->data_size -= rr;
++	
++	return cb_write(&cb2, fd, nbytes);
++}
++
++
++
+ ssize_t cb_send(circ_buf_t *cb, int fd, size_t nbytes,
+                 struct sockaddr *dest, size_t destlen)
+ {
+--- nc6-1.0.orig/src/circ_buf.h	2009-09-07 07:41:40.000000000 +0200
++++ nc6-1.0/src/circ_buf.h	2009-09-07 14:41:17.000000000 +0200
+@@ -55,6 +55,7 @@
+                 struct sockaddr *from, size_t *fromlen);
+ 
+ ssize_t cb_write(circ_buf_t *cb, int fd, size_t nbytes);
++ssize_t cb_write_crlf(circ_buf_t *cb, int fd, size_t nbytes);
+ ssize_t cb_send(circ_buf_t *cb, int fd, size_t nbytes,
+                 struct sockaddr *dest, size_t destlen);
+ 
+--- nc6-1.0.orig/src/io_stream.c	2009-09-07 07:41:40.000000000 +0200
++++ nc6-1.0/src/io_stream.c		2009-09-07 14:40:50.000000000 +0200
+@@ -359,6 +359,57 @@
+ 
+ 
+ 
++ssize_t ios_write_crlf(io_stream_t *ios)
++{
++	ssize_t rr;
++
++	/* check argument */
++	ios_assert(ios);
++	
++	/* should only be called if ios_schedule_write returned a true result */
++	assert(ios->fd_out >= 0);
++	assert(!cb_is_empty(ios->buf_out));
++
++	/* write as much as the mtu allows */
++	if (ios->socktype == SOCK_DGRAM)
++		rr = cb_send(ios->buf_out, ios->fd_out, ios->mtu, NULL, 0);
++	else
++		rr = cb_write_crlf(ios->buf_out, ios->fd_out, ios->mtu);
++
++	if (rr > 0) {
++		ios->sent += rr;
++#ifndef NDEBUG
++		if (very_verbose_mode())
++			warning("wrote %d bytes to %s", rr, ios->name);
++#endif
++		/* record that the ios was active */
++		gettimeofday(&(ios->last_active), NULL);
++
++		/* shutdown the write if buf_out is empty and out eof is set */
++		if ((ios->flags & IOS_OUTPUT_EOF) && cb_is_empty(ios->buf_out))
++			ios_shutdown(ios, SHUT_WR);
++
++		return rr;
++	} else if (rr == 0) {
++		/* shouldn't happen? */
++		return 0;
++	} else if (errno == EAGAIN) {
++		/* not ready? */
++		return 0;
++	} else {
++		if (very_verbose_mode()) {
++			if (errno == EPIPE)
++				warning(_("received SIGPIPE on %s"), ios->name);
++			else
++				warning(_("error writing to %s: %s"),
++				     ios->name, strerror(errno));
++		}
++		return IOS_FAILED;
++	}
++}
++
++
++
+ void ios_write_eof(io_stream_t *ios)
+ {
+ 	/* check argument */
+--- nc6-1.0.orig/src/io_stream.h	2009-09-07 07:41:40.000000000 +0200
++++ nc6-1.0/src/io_stream.h		2009-09-07 14:39:16.000000000 +0200
+@@ -110,6 +110,10 @@
+  * should only be called if ios_schedule_write returned a true value
+  * returns the total bytes read, or a negative error code */
+ ssize_t ios_write(io_stream_t *ios);
++/* write from the output buffer in CDRL mode.
++ * should only be called if ios_schedule_write returned a true value
++ * returns the total bytes read, or a negative error code */
++ssize_t ios_write_crlf(io_stream_t *ios);
+ 
+ /* error return values from ios_read/ios_write */
+ #define IOS_FAILED	-1
+--- nc6-1.0.orig/src/parser.c	2009-09-07 07:41:40.000000000 +0200
++++ nc6-1.0/src/parser.c	2009-09-07 14:32:08.000000000 +0200
+@@ -56,6 +56,7 @@
+ 
+ /* storage for the global flags */
+ static int _verbosity_level = 0;
++static int opt_crlf = 0x00;    /* CRLF line-ending default false */
+ 
+ /* long options */
+ static const struct option long_options[] = {
+@@ -160,7 +161,7 @@
+ 	_verbosity_level = 0;
+ 
+ 	/* option recognition loop */
+-	while ((c = getopt_long(argc, argv, "46be:T:hlnp:q:s:uvw:xX",
++	while ((c = getopt_long(argc, argv, "46be:T:hlnp:q:s:uvw:xXC",
+ 	                        long_options, &option_index)) >= 0)
+ 	{
+  		switch (c) {
+@@ -285,6 +286,14 @@
+ 		case 'v':	
+ 			++_verbosity_level;
+ 			break;
++ 		case 'C':     /* CRLF line-ending */
++#ifdef CRLFOPTION
++			opt_crlf = 0x01; /* CRLF true */
++#else
++			fatal_internal(
++			"invalid option -- %c (netcat was compiled with --disable-crlfoption)\n", c);
++#endif /* CRLFOPTION */
++			break;
+ 		case 'w':
+ 			assert(optarg != NULL);
+ 			if (safe_atoi(optarg, &connect_timeout))
+@@ -537,6 +546,13 @@
+ 
+ 
+ 
++bool crlf_mode()
++{
++	return ((opt_crlf == 0x00) ? false : true);
++}
++
++
++
+ static void print_usage(FILE *fp)
+ {
+ 	const char *program_name = get_program_name();
+@@ -596,6 +612,9 @@
+ 	fprintf(fp, " -v                     %s\n",
+ 	              _("Increase program verbosity\n"
+ "                        (call twice for max verbosity)"));
++#ifdef CRLFOPTION
++	fprintf(fp, " -C                     %s\n", _("Send CRLF as line ending"));
++#endif /* CRLFOPTION */
+ 	fprintf(fp, " --version              %s\n",
+ 	              _("Display nc6 version information"));
+ 	fprintf(fp, " -w, --timeout=SECONDS  %s\n",
+--- nc6-1.0.orig/src/parser.h	2009-09-07 07:41:40.000000000 +0200
++++ nc6-1.0/src/parser.h	2009-09-07 14:32:26.000000000 +0200
+@@ -26,6 +26,7 @@
+ 
+ bool verbose_mode(void);
+ bool very_verbose_mode(void);
++bool crlf_mode(void);
+ 
+ void parse_arguments(int argc, char **argv, connection_attributes_t *attrs);
+ 
+--- nc6-1.0.orig/src/readwrite.c	2009-09-07 07:41:40.000000000 +0200
++++ nc6-1.0/src/readwrite.c		2009-09-07 14:36:18.000000000 +0200
+@@ -199,7 +199,10 @@
+ 		if (ios1_write_fd >= 0 && FD_ISSET(ios1_write_fd, &write_fdset))
+ 		{
+ 			/* ios1 is ready to write */
+-			rr = ios_write(ios1);
++			if ( crlf_mode() ) 
++				rr = ios_write_crlf(ios1); /* CRLF mode */
++			else
++				rr = ios_write(ios1);
+ 
+ 			if (rr < 0) {
+ 				/* write failed -

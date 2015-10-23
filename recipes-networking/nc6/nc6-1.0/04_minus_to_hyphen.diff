@@ -1,0 +1,160 @@
+Change hyphen to minus in manpage
+
+Upstream-Status: Pending [Debian patch] 
+
+--- a/docs/nc6.1.in
++++ b/docs/nc6.1.in
+@@ -69,19 +69,19 @@
+ .TP 13
+ .I \-b, --bluetooth
+ With this option set, netcat6 will use bluetooth to establish connections.
+-By default the L2CAP protocol will be used (also see '--sco').
++By default the L2CAP protocol will be used (also see '\-\-sco').
+ .TP 13
+ .I \--buffer-size=BYTES
+ Set the buffer size for the local and remote endpoints.
+ netcat6 does all reads into these buffers, so they should be large enough
+ to minimize excessive reads from the socket and in UDP mode it should be large
+-enough to receive an entire datagram (also see '--nru').  By default, the
++enough to receive an entire datagram (also see '\-\-nru').  By default, the
+ buffer size is 8 kilobytes for TCP connections and 128 kilobytes for UDP.
+ .TP 13
+ .I \--continuous
+ Enable continuous accepting of connections in listen mode, like inetd.  Must
+-be used with --exec to specify the command to run locally (try 'nc6
+---continuous --exec cat -l -p <port>' to make a simple echo server).
++be used with \-\-exec to specify the command to run locally (try 'nc6
++\-\-continuous \-\-exec cat \-l \-p <port>' to make a simple echo server).
+ .TP 13
+ .I \--disable-nagle
+ Disable the use of the Nagle algorithm for TCP connections (see "NAGLE
+@@ -153,7 +153,7 @@
+ .TP 13
+ .I \--sco
+ With this option set, netcat6 with use SCO over bluetooth
+-(note that '-b' or '--bluetooth' must also be specified).
++(note that '\-b' or '\-\-bluetooth' must also be specified).
+ .TP 13
+ .I \--send-only
+ Only send data, don't receive.  This also disables any hold timeouts.
+@@ -180,13 +180,13 @@
+ .TP 13
+ .I \-x, --transfer
+ File transfer mode (see "FILE TRANSFER").  If listen mode is
+-specified, this is equivalent to "--recv-only --buffer-size=65536" otherwise
+-it is equivalent to "--send-only --buffer-size=65536".
++specified, this is equivalent to "\-\-recv-only \-\-buffer-size=65536" otherwise
++it is equivalent to "\-\-send-only \-\-buffer-size=65536".
+ .I \-X, --rev-transfer
+ Reverse file transfer mode (see "FILE TRANSFER").  This transfers in the
+ opposite direction to normal transfer.  If listen mode is specified, this is
+-equivalent to "--send-only --buffer-size=65536" otherwise it is equivalent to
+-"--recv-only --buffer-size=65536".
++equivalent to "\-\-send-only \-\-buffer-size=65536" otherwise it is equivalent to
++"\-\-recv-only \-\-buffer-size=65536".
+ .SH UDP
+ UDP support in netcat6 works very well in both connect and in listen mode.
+ When using UDP in listen mode netcat6 accepts UDP packets from any source that
+@@ -205,13 +205,13 @@
+ .P
+ netcat6 allows for fine control over the buffer sizes, MTU's and NRU's for the
+ connection, which is especially useful for UDP connections.  See the
+---buffer-size, --mtu and --nru options.
++\-\-buffer-size, \-\-mtu and \-\-nru options.
+ .SH TIMEOUTS
+ netcat6 currently implements a connect/accept timeout, and idle timeout, and
+ hold timeouts on both the remote and local endpoints.
+ .IP \(bu 4
+-The connect/accept timeout is optional and is specified with the -w or
+---timeout option.  If a connection cannot be established within the specified
++The connect/accept timeout is optional and is specified with the \-w or
++\-\-timeout option.  If a connection cannot be established within the specified
+ time, nc6 will exit with a non-zero exit status.  If the option is not
+ specified, nc6 will wait forever when listening for new connections
+ (in listen mode), and will use the standard operating system timeout when
+@@ -219,7 +219,7 @@
+ essentially ignored when creating UDP connections to a remote server, as UDP
+ is a connectionless protocol.
+ .IP \(bu 4
+-The idle timeout is optional and is specified with the -t or --idle-timeout
++The idle timeout is optional and is specified with the \-t or \-\-idle-timeout
+ option.  If no data is sent or received from the remote host in the specified
+ time, nc6 will exit with a non-zero exit status.  The default is to not
+ timeout idle connections.
+@@ -244,7 +244,7 @@
+ default.
+ .SH FILE TRANSFER
+ netcat6 can be used to transfer files and data streams efficiently, using the
+-\'-x' or '--transfer' command line option (or the '-X' and '--rev-transfer'
++\'\-x' or '\-\-transfer' command line option (or the '\-X' and '\-\-rev-transfer'
+ equivalents for transfer in the opposite direction).
+ .P
+ For example, to transfer a file from machine 'foo.example.com' to machine
+@@ -253,32 +253,32 @@
+ On 'bar', set up a listening nc6 on any local port:
+ .RS
+ 
+-bar$ nc6 -x -l -p 7676 > targetfile
++bar$ nc6 \-x \-l \-p 7676 > targetfile
+ 
+ .RE
+ Then on 'foo', use nc6 to send the file to the listening nc6:
+ .RS
+ 
+-foo$ nc6 -x bar.example.com 7676 < sourcefile
++foo$ nc6 \-x bar.example.com 7676 < sourcefile
+ 
+ .RE
+ You can also use file transfer mode to pipe the output of programs over
+ networks.  For example, you can use tar with nc6 to copy entire directories:
+ .RS
+ 
+-bar$ nc6 -x -l -p 7676 | tar xpzf -
++bar$ nc6 \-x \-l \-p 7676 | tar xpzf \-
+ 
+-foo$ tar cpzf - /home | nc6 -x bar.example.com 7676
++foo$ tar cpzf \- /home | nc6 \-x bar.example.com 7676
+ 
+ .RE
+-The '-x' or '--transfer' option is just an alias for various other options
++The '\-x' or '\-\-transfer' option is just an alias for various other options
+ which set the direction of transfer and increase the buffer sizes used.  In
+-listen mode, it is equivalent to "--recv-only --buffer-size=65536" otherwise
+-it is equivalent to "--send-only --buffer-size=65536".
++listen mode, it is equivalent to "\-\-recv-only \-\-buffer-size=65536" otherwise
++it is equivalent to "\-\-send-only \-\-buffer-size=65536".
+ .P
+ The normal file transfer mode options assume the file will be sent TO the
+ netcat6 process that is in listen mode, FROM the netcat6 process that is
+-connecting to it.  To transfer the other way use the -X or --rev-transfer
++connecting to it.  To transfer the other way use the \-X or \-\-rev-transfer
+ options.
+ .SH HALF CLOSE
+ Stream based data transfers, such as TCP, have 2 separate streams - the
+@@ -299,7 +299,7 @@
+ transmit stream after they send their request.  In default mode, netcat6 will
+ close the entire connection before sending the response back to the client.
+ .P
+-However, by specifying the "--half-close" option, netcat6 will keep trying to
++However, by specifying the "\-\-half-close" option, netcat6 will keep trying to
+ send data to the remote server after the receive stream has closed.  It will
+ also close the remote transmit stream when there is no more data to send
+ (EOF has been received on stdin).
+@@ -324,7 +324,7 @@
+ algorithm on most systems, using the TCP_NODELAY socket option.
+ .P
+ .B netcat6
+-provides the '--disable-nagle' command line option to disable the Nagle
++provides the '\-\-disable-nagle' command line option to disable the Nagle
+ algorithm for the connection.
+ .SH ERRORS
+ .B netcat6
+@@ -337,7 +337,7 @@
+ to the stdout without any errors.  It DOES NOT indicate whether all data read
+ from stdin has been successfully sent to the remote machine.
+ .P
+-In --half-close mode, nc6 exists successfully when an EOF has been received
++In \-\-half-close mode, nc6 exists successfully when an EOF has been received
+ from both the remote machine AND from stdin, and all data has been
+ successfully sent.  Thus the exit status indicates that all data was
+ transfered successfully.

@@ -1,0 +1,25 @@
+From fff90b7a122ca0ed707e066fdbef634891e6387f Mon Sep 17 00:00:00 2001
+From: Chen Qi <Qi.Chen@windriver.com>
+Date: Tue, 11 Mar 2014 01:45:40 -0400
+Subject: nc6: fix a configure.ac to avoid syntax error in generated configure
+
+Signed-off-by: Chen Qi <Qi.Chen@windriver.com>
+---
+ configure.ac |    1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/configure.ac b/configure.ac
+index af243e6..ef63f0c 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -4,6 +4,7 @@ AC_CONFIG_AUX_DIR(config)
+ AC_CONFIG_SRCDIR(src/main.c)
+ AM_GNU_GETTEXT_VERSION(0.14.1)
+ AM_INIT_AUTOMAKE(1.6)           dnl Automake 1.6 or better is required
++
+ AM_CONFIG_HEADER(config.h)
+ AC_PREREQ(2.52)                 dnl Autoconf 2.52 or better is required
+ 
+-- 
+1.7.9.5
+

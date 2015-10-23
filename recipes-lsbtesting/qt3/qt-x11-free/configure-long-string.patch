@@ -1,0 +1,48 @@
+configure: user a larger array QT_INSTALL_PREFIX
+
+When qt is built in the deep directory, for example when len(TMPDIR) = 410
+which is supported by us, there would be an error:
+
+"initializer-string for array of chars is too long"
+
+Use 512 + 12 as qt4-native rather than 267 will fix the problem.
+
+Upstream-Status: Pending
+
+Signed-off-by: Robert Yang <liezhi.yang@windriver.com>
+---
+ configure |   18 +++++++++---------
+ 1 file changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/configure b/configure
+index 6e46140..9073638 100755
+--- a/configure
++++ b/configure
+@@ -1054,15 +1054,15 @@ done
+ cat > $outpath/src/tools/qconfig.cpp.new <<EOF
+ /* Install paths from configure */
+ 
+-static const char QT_INSTALL_PREFIX      [267] = "qt_nstpath=$QT_INSTALL_PREFIX";
+-static const char QT_INSTALL_BINS        [267] = "qt_binpath=$QT_INSTALL_BINS";
+-static const char QT_INSTALL_DOCS        [267] = "qt_docpath=$QT_INSTALL_DOCS";
+-static const char QT_INSTALL_HEADERS     [267] = "qt_hdrpath=$QT_INSTALL_HEADERS";
+-static const char QT_INSTALL_LIBS        [267] = "qt_libpath=$QT_INSTALL_LIBS";
+-static const char QT_INSTALL_PLUGINS     [267] = "qt_plgpath=$QT_INSTALL_PLUGINS";
+-static const char QT_INSTALL_DATA        [267] = "qt_datpath=$QT_INSTALL_DATA";
+-static const char QT_INSTALL_TRANSLATIONS[267] = "qt_trnpath=$QT_INSTALL_TRANSLATIONS";
+-static const char QT_INSTALL_SYSCONF     [267] = "qt_cnfpath=$QT_INSTALL_SYSCONF";
++static const char QT_INSTALL_PREFIX      [512 + 12] = "qt_nstpath=$QT_INSTALL_PREFIX";
++static const char QT_INSTALL_BINS        [512 + 12] = "qt_binpath=$QT_INSTALL_BINS";
++static const char QT_INSTALL_DOCS        [512 + 12] = "qt_docpath=$QT_INSTALL_DOCS";
++static const char QT_INSTALL_HEADERS     [512 + 12] = "qt_hdrpath=$QT_INSTALL_HEADERS";
++static const char QT_INSTALL_LIBS        [512 + 12] = "qt_libpath=$QT_INSTALL_LIBS";
++static const char QT_INSTALL_PLUGINS     [512 + 12] = "qt_plgpath=$QT_INSTALL_PLUGINS";
++static const char QT_INSTALL_DATA        [512 + 12] = "qt_datpath=$QT_INSTALL_DATA";
++static const char QT_INSTALL_TRANSLATIONS[512 + 12] = "qt_trnpath=$QT_INSTALL_TRANSLATIONS";
++static const char QT_INSTALL_SYSCONF     [512 + 12] = "qt_cnfpath=$QT_INSTALL_SYSCONF";
+ 
+ /* strlen( "qt_xxxpath=" ) == 11 */
+ const char *qInstallPath()             { return QT_INSTALL_PREFIX       + 11; }
+-- 
+1.7.10.4
+

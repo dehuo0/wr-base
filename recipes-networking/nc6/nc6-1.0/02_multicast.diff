@@ -1,0 +1,247 @@
+Fix for multicast addresses in UDP mode
+
+Upstream-Status: Pending [Debian patch] 
+
+--- a/docs/nc6.1.in
++++ b/docs/nc6.1.in
+@@ -117,6 +117,11 @@
+ .I \--no-reuseaddr
+ Disables the SO_REUSEADDR socket option (this is only useful in listen mode).
+ .TP 13
++.I \-T, \--ttl=TTL
++Set's the IP TTL of the packets leaving (this is only useful in connect mode).
++This is mainly useful for multicast, otherwise packets will often leave with
++the OS default of 1, making it rarely useful.
++.TP 13
+ .I \--nru=BYTES
+ Set the miNimum Receive Unit for the remote endpoint (network receives).  Note
+ that this does not mean that every network read will get the specified number
+--- a/src/afindep.c
++++ b/src/afindep.c
+@@ -64,6 +64,9 @@
+ 	struct addrinfo *res = NULL, *ptr;
+ 	bool connect_attempted = false;
+ 	char name_buf[AI_STR_SIZE];
++	const connection_attributes_t *attrs =
++		*((const connection_attributes_t **)hdata);
++	int on;
+ 
+ 	/* make sure arguments are valid and preconditions are respected */
+ 	assert(hints != NULL);
+@@ -90,6 +93,23 @@
+ 		/* only accept results we can handle */
+ 		if (skip_address(ptr) == true) continue;
+ 
++		if (ptr->ai_socktype == SOCK_STREAM) {
++			if (ptr->ai_family == PF_INET) {
++				if (IN_MULTICAST(ntohl(((struct sockaddr_in *)(ptr->ai_addr))->sin_addr.s_addr))) {
++					warning("socket type STREAM and multicast bad, udp only!");
++					return -1;
++				}
++			}
++#ifdef ENABLE_IPV6
++			else if (ptr->ai_family == PF_INET6) {
++				if (IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6 *)(ptr->ai_addr))->sin6_addr)) {
++					warning("socket type STREAM and multicast bad, udp only!");
++					return -1;
++				}
++			}
++#endif
++		}
++
+ 		/* we are going to try to connect to this address */
+ 		connect_attempted = true;
+ 
+@@ -182,6 +202,28 @@
+ 			freeaddrinfo(src_res);
+ 		}
+ 
++		/* setup the ttl */
++		if ((on = ca_ttl(attrs)) > -1) {
++			if ( ptr->ai_family == PF_INET ) {
++				if (IN_MULTICAST(ntohl(((struct sockaddr_in *)(ptr->ai_addr))->sin_addr.s_addr))) {
++					setsockopt(fd, SOL_IP, IP_MULTICAST_TTL, &on, sizeof(on));
++				}
++				else {
++					setsockopt(fd, SOL_IP, IP_TTL, &on, sizeof(on));
++				}
++			}
++#ifdef ENABLE_IPV6
++			else if ( ptr->ai_family == PF_INET6 ) {
++				if (IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6 *)(ptr->ai_addr))->sin6_addr)) {
++					setsockopt(fd, SOL_IPV6, IPV6_MULTICAST_HOPS, &on, sizeof(on));
++				}
++				else {
++					setsockopt(fd, SOL_IPV6, IPV6_UNICAST_HOPS, &on, sizeof(on));
++				}
++			}
++#endif
++		}
++
+ 		/* attempt the connection */
+ 		err = connect_with_timeout(fd,
+ 				ptr->ai_addr, ptr->ai_addrlen, timeout);
+@@ -250,7 +292,10 @@
+ {
+ 	int nfd, i, fd, err, maxfd = -1;
+ 	struct addrinfo *res = NULL, *ptr;
++	int off = 0;
++	struct ip_mreq mreq;
+ #ifdef ENABLE_IPV6
++	struct ipv6_mreq mreq6;
+ 	bool set_ipv6_only = false;
+ 	bool bound_ipv6_any = false;
+ #endif
+@@ -327,7 +372,24 @@
+ 
+ 		/* only accept results we can handle */
+ 		if (skip_address(ptr) == true) continue;
+-		
++
++		if (ptr->ai_socktype == SOCK_STREAM) {
++			if (ptr->ai_family == PF_INET) {
++				if (IN_MULTICAST(ntohl(((struct sockaddr_in *)(ptr->ai_addr))->sin_addr.s_addr))) {
++					warning("socket type STREAM and multicast bad, udp only!");
++					return -1;
++				}
++			}
++#ifdef ENABLE_IPV6
++			else if (ptr->ai_family == PF_INET6) {
++				if (IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6 *)(ptr->ai_addr))->sin6_addr)) {
++					warning("socket type STREAM and multicast bad, udp only!");
++					return -1;
++				}
++			}
++#endif
++		}
++
+ 		/* create the socket */
+ 		fd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
+ 		if (fd < 0) {
+@@ -414,6 +476,27 @@
+ 		FD_SET(fd, &accept_fdset);
+ 		maxfd = MAX(maxfd, fd);
+ 		nfd++;
++
++		if (ptr->ai_family == PF_INET) {
++			if (IN_MULTICAST(ntohl(((struct sockaddr_in *)(ptr->ai_addr))->sin_addr.s_addr))) {
++				memset(&mreq, 0, sizeof(mreq));
++				mreq.imr_multiaddr = ((struct sockaddr_in *)(ptr->ai_addr))->sin_addr;
++				mreq.imr_interface.s_addr = INADDR_ANY;
++				setsockopt(fd, SOL_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq));
++				setsockopt(fd, SOL_IP, IP_MULTICAST_LOOP, &off, sizeof(off));
++			}
++		}
++#ifdef ENABLE_IPV6
++		else if (ptr->ai_family == PF_INET6) {
++			if (IN6_IS_ADDR_MULTICAST(&((struct sockaddr_in6 *)(ptr->ai_addr))->sin6_addr)) {
++				memset(&mreq6, 0, sizeof(mreq6));
++				mreq6.ipv6mr_multiaddr = ((struct sockaddr_in6 *)(ptr->ai_addr))->sin6_addr;
++				mreq6.ipv6mr_interface = 0;
++				setsockopt(fd, SOL_IPV6, IPV6_JOIN_GROUP, &mreq6, sizeof(mreq));
++				setsockopt(fd, SOL_IPV6, IPV6_MULTICAST_LOOP, &off, sizeof(off));
++			}
++		}
++#endif
+ 	}
+ 
+ 	freeaddrinfo(res);
+--- a/src/connection.h
++++ b/src/connection.h
+@@ -56,6 +56,7 @@
+ 	sock_protocol_t protocol;
+ 	address_t remote_address;
+ 	address_t local_address;
++	int ttl;
+ 	int flags;
+ 	size_t buffer_size;
+ 	size_t remote_mtu;
+@@ -104,6 +105,9 @@
+ #define ca_set_flag(CA, FLG)		((CA)->flags |=  (FLG))
+ #define ca_clear_flag(CA, FLG)		((CA)->flags &= ~(FLG))
+ 
++#define ca_ttl(CA)			((CA)->ttl)
++#define ca_set_ttl(CA, SZ)		((CA)->ttl = (SZ))
++
+ #define ca_buffer_size(CA)		((CA)->buffer_size)
+ #define ca_set_buffer_size(CA, SZ)	((CA)->buffer_size = (SZ))
+ 
+--- a/src/parser.c
++++ b/src/parser.c
+@@ -109,7 +109,9 @@
+ 	{"bluetooth",           no_argument,        NULL, 'b'},
+ #define OPT_SCO			24
+ 	{"sco",			no_argument,        NULL,  0 },
+-#define OPT_MAX			25
++#define OPT_TTL			25
++	{"ttl",                 required_argument,  NULL, 'T'},
++#define OPT_MAX			26
+ 	{0, 0, 0, 0}
+ };
+ 
+@@ -142,6 +144,7 @@
+ 	int remote_hold_timeout = 0;
+ 	int remote_mtu = 0;
+ 	int remote_nru = 0;
++	int ttl = -1;
+ 	int buffer_size = 0;
+ 	int sndbuf_size = 0;
+ 	int rcvbuf_size = 0;
+@@ -160,7 +163,7 @@
+ 	_verbosity_level = 0;
+ 
+ 	/* option recognition loop */
+-	while ((c = getopt_long(argc, argv, "46be:hlnp:q:s:uvw:xX",
++	while ((c = getopt_long(argc, argv, "46be:T:hlnp:q:s:uvw:xX",
+ 	                        long_options, &option_index)) >= 0)
+ 	{
+  		switch (c) {
+@@ -296,6 +299,14 @@
+ 		case 'X':	
+ 			rev_file_transfer = true;
+ 			break;
++		case 'T':
++			assert(optarg != NULL);
++			if (safe_atoi(optarg, &ttl))
++				fatal(_("invalid argument to "
++				      "--ttl"));
++			if (ttl < -1 || ttl > 255 )
++				fatal(_("ttl can only be set between 0 to 255"));
++			break;
+ 		case '?':
+ 			print_usage(stderr);
+ 			exit(EXIT_FAILURE);
+@@ -446,6 +457,11 @@
+ 			fatal(_("--continuous option "
+ 			      "must be used with --exec"));
+ 		}
++
++		if (ttl != -1) {
++			warning(_("setting ttl in listen mode "
++			      "is meaningless, ignoring"));
++		}
+ 	} else {
+ 		/* check port has been specified (except with sco) */
+ 		if (remote_address.address == NULL || 
+@@ -508,11 +524,12 @@
+ 	if (set_local_hold_timeout == true)
+ 		ca_set_local_hold_timeout(attrs, local_hold_timeout);
+ 	
+-	/* setup mtu, nru, and buffer sizes if they were specified */
++	/* setup mtu, nru, ttl, and buffer sizes if they were specified */
+ 	if (remote_mtu > 0)
+ 		ca_set_remote_MTU(attrs, remote_mtu);
+ 	if (remote_nru > 0)
+ 		ca_set_remote_NRU(attrs, remote_nru);
++	ca_set_ttl(attrs, ttl);
+ 	if (buffer_size > 0)
+ 		ca_set_buffer_size(attrs, buffer_size);
+ 	if (sndbuf_size > 0)
+@@ -603,6 +620,7 @@
+ 	fprintf(fp, " -x, --transfer         %s\n", _("File transfer mode"));
+ 	fprintf(fp, " -X, --rev-transfer     %s\n",
+ 	              _("File transfer mode (reverse direction)"));
++	fprintf(fp, " -T, --ttl=TTL          %s\n", _("TTL of outgoing IP packet"));
+ 	fprintf(fp, "\n");
+ }
+ 

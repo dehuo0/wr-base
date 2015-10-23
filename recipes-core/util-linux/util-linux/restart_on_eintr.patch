@@ -1,0 +1,41 @@
+---
+ term-utils/script.c | 16 ++++++++++++----
+ 1 file changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/term-utils/script.c b/term-utils/script.c
+index 1c81b24..9bb8cad 100644
+--- a/term-utils/script.c
++++ b/term-utils/script.c
+@@ -649,8 +649,12 @@ doinput(void) {
+ 	while (die == 0) {
+ 		memcpy(&rds, &master_rds, sizeof(master_rds));
+ 		select_ret = select(1, &rds, NULL, NULL, NULL);
+-		if (select_ret < 0)
+-			break;
++		if (select_ret < 0) {
++			if (errno == EINTR)
++				continue;
++			else
++				break;
++		}
+ 
+ 		FD_SET(STDIN_FILENO, &readfds);
+ 
+@@ -727,8 +731,12 @@ socket_con:
+ 	while (die == 0) {
+ 		memcpy(&rds, &master_rds, sizeof(master_rds));
+ 		select_ret = select(nsockhandle, &rds, NULL, NULL, NULL);
+-		if (select_ret < 0)
+-			break;
++		if (select_ret < 0) {
++			if (errno == EINTR)
++				continue;
++			else
++				break;
++		}
+ 		if (FD_ISSET(0, &rds))
+ 		if (handle_stdin(ibuf) < 0) {
+ 			fprintf(stderr, "Error: Client input failure\n");
+-- 
+1.9.1
+
