@@ -1,0 +1,27 @@
+Upstream-Status: Backport
+
+Imported from upstream Xerces-C++ trunk:
+http://svn.apache.org/viewvc?view=revision&revision=1677601
+
+------------------------------------------------------------------------
+r1677601 | amassari | 2015-05-04 22:20:36 +0800 (Mon, 04 May 2015) | 1 line
+Changed paths:
+   M /xerces/c/trunk/src/xercesc/util/XMLString.hpp
+
+Use memmove to implement XMLString::moveChars (XERCESC-2049)
+
+Index: src/xercesc/util/XMLString.hpp
+===================================================================
+--- src/xercesc/util/XMLString.hpp	(revision 1677600)
++++ src/xercesc/util/XMLString.hpp	(revision 1677601)
+@@ -1454,7 +1454,7 @@
+                                 , const XMLCh* const srcStr
+                                 , const XMLSize_t    count)
+ {
+-    memcpy(targetStr, srcStr, count * sizeof(XMLCh));
++    memmove(targetStr, srcStr, count * sizeof(XMLCh));
+ }
+ 
+ inline XMLSize_t XMLString::stringLen(const XMLCh* const src)
+
+------------------------------------------------------------------------
