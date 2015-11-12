@@ -34,3 +34,16 @@ SRC_URI += "file://rdist-6.1.5-bb-build.patch"
 DEPENDS = "bison-native"
 
 inherit autotools-brokensep
+
+inherit useradd
+
+# You must set USERADD_PACKAGES when you inherit useradd. This
+# lists which output packages will include the user/group
+# creation code.
+USERADD_PACKAGES = "${PN}"
+
+# You must also set USERADD_PARAM and/or GROUPADD_PARAM when
+# you inherit useradd.
+
+GROUPADD_PARAM_${PN} = "-g 2 bin"
+
