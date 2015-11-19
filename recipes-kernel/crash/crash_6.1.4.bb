@@ -30,7 +30,7 @@ python __anonymous () {
     crash_pn = ""
     crash_mlprefix = ""
     target_arch = d.getVar('TRANSLATED_TARGET_ARCH', True)
-    kernel_arch = d.getVar('KARCH', True).replace("_", "-")
+    kernel_arch = (d.getVar('KARCH', True) or d.getVar('TRANSLATED_TARGET_ARCH', True)).replace("_", "-")
     pn = d.getVar('PN', True)
     bpn = d.getVar('BPN', True)
 
