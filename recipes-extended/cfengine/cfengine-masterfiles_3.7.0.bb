@@ -31,3 +31,5 @@ inherit autotools
 EXTRA_OECONF = "--prefix=${localstatedir}/cfengine"
 
 FILES_${PN} += "${localstatedir}/cfengine"
+
+RDEPENDS_${PN} += "python-core"
