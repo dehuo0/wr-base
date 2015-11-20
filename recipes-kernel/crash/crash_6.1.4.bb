@@ -89,7 +89,7 @@ do_install() {
 	if [ "${CRASH_ARCH_DISACCORD}" = "1" ]; then
 		src=`ls -d ${BASE_WORKDIR}/*/${CRASH_PN}/${EXTENDPE}${PV}-${PR}/image | head -1`
 		if [ -d $src ]; then
-			tar -cf - -C $src . | tar -xf - -C ${D}
+			tar -cf - -C $src . | tar --no-same-owner -xf - -C ${D}
 		fi
 	else
 		mkdir -p ${D}${bindir}
