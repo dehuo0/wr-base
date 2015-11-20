@@ -76,6 +76,7 @@ do_install() {
 	oe_libinstall -so -C lib libqt-mt ${D}${libdir}
 	install -d ${D}${libdir}/qt3/plugins/
 	cp -pPR plugins/imageformats plugins/sqldrivers plugins/designer ${D}${libdir}/qt3/plugins/
+	chown -R root:root ${D}${libdir}/qt3/plugins
 
 	# Avoid empty directory QA error
 	rmdir ${D}${libdir}/qt3/plugins/sqldrivers 2>/dev/null || true
