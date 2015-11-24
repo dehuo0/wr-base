@@ -10,9 +10,6 @@ TOOLCHAIN_HOST_TASK += \
       nativesdk-python-debugger \
      "
 
-# The buildtools is special, avoid custom SDK tasks.
-WRS_CREATE_SDK_FILES = ""
-
 SDK_POSTPROCESS_COMMAND_prepend = "gen_buildtools_delete_target ;"
 
 gen_buildtools_delete_target() {
