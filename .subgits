@@ -4,10 +4,3 @@
 	path = downloads
 	url = ../wr-base-dl
 	optional = true
-
-[subgit "downloads.ND"]
-	bare = false
-	clone-or-force-pull-only = false
-	path = downloads.ND
-	url = ../wr-base-dl.ND
-	optional = true
