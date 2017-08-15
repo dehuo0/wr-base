@@ -4,8 +4,12 @@
 # LOCAL REV: add WR specific scripts
 #
 
-do_install_append() {
-    ln -sf /dev/null  ${D}${sysconfdir}/udev/rules.d/80-net-setup-link.rules
+pkg_postinst_udev_append() { 
+    if [ x"$D" = "x" ];then
+        ln -sf /dev/null ${sysconfdir}/udev/rules.d/80-net-setup-link.rules
+    else
+        ln -sf /dev/null .${sysconfdir}/udev/rules.d/80-net-setup-link.rules
+    fi
 }
 
 PACKAGECONFIG_append = " networkd"
