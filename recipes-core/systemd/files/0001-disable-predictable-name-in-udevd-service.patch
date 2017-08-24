@@ -1,0 +1,27 @@
+From 7925e9c08737485802e58a1136fe06cd7cf5f754 Mon Sep 17 00:00:00 2001
+From: dhuo <dhuo@windriver.com>
+Date: Wed, 23 Aug 2017 21:21:55 -0700
+Subject: [PATCH] Disable predictable name in udevd service
+
+Disable predictable netework interface names in udevd service
+
+Signed-off-by: De Huo <De.Huo@windriver.com>
+---
+ units/systemd-udevd.service.in | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/units/systemd-udevd.service.in b/units/systemd-udevd.service.in
+index e7216d61f..221559f25 100644
+--- a/units/systemd-udevd.service.in
++++ b/units/systemd-udevd.service.in
+@@ -20,6 +20,7 @@ OOMScoreAdjust=-1000
+ Sockets=systemd-udevd-control.socket systemd-udevd-kernel.socket
+ Restart=always
+ RestartSec=0
++ExecStartPre=@rootbindir@/ln -sf /dev/null /etc/udev/rules.d/80-net-setup-link.rules
+ ExecStart=@rootlibexecdir@/systemd-udevd
+ MountFlags=slave
+ KillMode=mixed
+-- 
+2.11.0
+

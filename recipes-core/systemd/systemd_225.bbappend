@@ -4,12 +4,10 @@
 # LOCAL REV: add WR specific scripts
 #
 
-pkg_postinst_udev_append() { 
-    if [ x"$D" = "x" ];then
-        ln -sf /dev/null ${sysconfdir}/udev/rules.d/80-net-setup-link.rules
-    else
-        ln -sf /dev/null .${sysconfdir}/udev/rules.d/80-net-setup-link.rules
-    fi
-}
+FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+
+SRC_URI += "\
+    file://0001-disable-predictable-name-in-udevd-service.patch \
+"
 
 PACKAGECONFIG_append = " networkd"
