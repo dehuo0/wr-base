@@ -11,3 +11,7 @@ SRC_URI += "\
 "
 
 PACKAGECONFIG_append = " networkd"
+
+pkg_postinst_systemd_append() {
+       systemd-machine-id-setup 2>/dev/null
+}
